@@ -11,6 +11,17 @@ Il progetto è strutturato come **monorepo** con tre workspace:
 - `frontend`: interfaccia web in React/TypeScript con Vite, Tailwind/shadcn e TanStack Query.
 - `shared`: logica di validazione condivisa tra backend e frontend (Zod).
 
+### Indice
+
+- [Architettura ad alto livello](#architettura-ad-alto-livello)
+- [Stack tecnologico](#stack-tecnologico)
+- [Come iniziare](#come-iniziare)
+  - [Prerequisiti](#prerequisiti)
+  - [Installazione](#installazione)
+  - [Avvio backend](#avvio-backend)
+  - [Avvio frontend](#avvio-frontend)
+- [Documentazione dettagliata](#documentazione-dettagliata)
+
 ### Architettura ad alto livello
 
 ```mermaid

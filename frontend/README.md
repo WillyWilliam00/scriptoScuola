@@ -8,6 +8,18 @@ Il frontend di **CopyTrack** è una **single page application** in **React + Typ
 
 È sviluppato con **Vite** e utilizza **Tailwind CSS**, componenti UI (shadcn, Base UI) e **TanStack Query** per la gestione dei dati lato client.
 
+### Indice
+
+- [Stack frontend](#stack-frontend)
+- [Struttura principale](#struttura-principale)
+- [Integrazione con il backend CopyTrack](#integrazione-con-il-backend-copytrack)
+- [Setup & avvio](#setup--avvio)
+  - [Prerequisiti](#prerequisiti)
+  - [Installazione dipendenze](#installazione-dipendenze)
+  - [Avvio in sviluppo](#avvio-in-sviluppo)
+- [Build di produzione](#build-di-produzione)
+- [Note di design](#note-di-design)
+
 ### Stack frontend
 
 - React 19 + TypeScript

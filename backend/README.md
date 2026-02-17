@@ -8,6 +8,23 @@ Il backend di **CopyTrack** espone una serie di **API REST** multi‑tenant per 
 
 È scritto in **TypeScript** usando **Express**, con **PostgreSQL** (es. Neon) come database e **Drizzle ORM** per l’accesso ai dati.
 
+### Indice
+
+- [Stack backend](#stack-backend)
+- [Struttura principale](#struttura-principale)
+- [Rotte principali](#rotte-principali)
+  - [Autenticazione – `/api/auth`](#autenticazione--apiauth)
+  - [Docenti – `/api/docenti`](#docenti--apidocenti)
+  - [Utenti – `/api/utenti`](#utenti--apiutenti)
+  - [Registrazioni copie – `/api/registrazioni-copie`](#registrazioni-copie--apiregistrazioni-copie)
+- [Modello dati (alto livello)](#modello-dati-alto-livello)
+- [Setup & avvio](#setup--avvio)
+  - [Variabili d’ambiente](#variabili-dambiente)
+  - [Installazione dipendenze](#installazione-dipendenze)
+  - [Avvio in sviluppo](#avvio-in-sviluppo)
+- [Test](#test)
+- [Note architetturali](#note-architetturali)
+
 ### Stack backend
 
 - Node.js + TypeScript
