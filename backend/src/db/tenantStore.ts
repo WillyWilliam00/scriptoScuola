@@ -5,7 +5,7 @@ import type { DocentiPaginatedResponse, DocentiSort, SortOrder, UtentiPaginatedR
 import { SQL, sql } from "drizzle-orm";
 import type { ErrorWithStatus } from "../middleware/auth.js";
 import bcrypt from 'bcrypt';
-import type { NeonHttpDatabase } from "drizzle-orm/neon-http";
+import type { NodePgDatabase } from "drizzle-orm/node-postgres";
 import * as schema from "./schema.js";
 import { buildPagination } from "./utils/pagination.js";
 import { wouldExceedLimit } from "./utils/limiti.js";
@@ -14,7 +14,7 @@ import { getSort } from "./utils/sort.js";
 import { isEmailIdentifier } from "./utils/auth.js";
 
 // Tipo helper per estrarre il tipo della transazione dal database
-type DbInstance = NeonHttpDatabase<typeof schema>;
+type DbInstance = NodePgDatabase<typeof schema>;
 type Transaction = Parameters<Parameters<DbInstance['transaction']>[0]>[0];
 export const createTenantStore = (istitutoId: number, db: DbInstance | Transaction) => {
 

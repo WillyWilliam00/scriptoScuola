@@ -42,9 +42,7 @@ router.post('/setup-scuola', asyncHandler(async (req: Request, res: Response) =>
         }
         
         // Creiamo lo store usando l'istitutoId appena creato
-        // Nota: lo store usa il db globale, ma dentro la transazione dovremmo usare tx
-        // Per ora usiamo il db globale perché createTenantStore non accetta una transazione
-        // In futuro potremmo migliorare questo aspetto
+        // Passiamo la transazione tx per garantire atomicità delle operazioni
         const tenantStore = createTenantStore(istituto.id, tx);
         
         // Usiamo lo store per creare l'utente admin
