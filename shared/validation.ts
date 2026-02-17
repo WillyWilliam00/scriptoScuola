@@ -1,0 +1,137 @@
+import { z } from 'zod';
+
+// --- Istituto ---
+export const insertIstitutoSchema = z.object({
+  nome: z.string().min(3, 'Il nome deve essere lungo almeno 3 caratteri'),
+  codiceIstituto: z.string().length(10, 'Il codice istituto deve essere lungo 10 caratteri'),
+});
+
+// --- Docente ---
+export const insertDocenteSchema = z.object({
+  nome: z.string().min(2, 'Inserisci un nome valido'),
+  cognome: z.string().min(2, 'Inserisci un cognome valido'),
+  limiteCopie: z.number().min(0, 'Il limite di copie deve essere almeno 0'),
+  istitutoId: z.number(),
+});
+export const modifyDocenteSchema = z.object({
+  nome: z.string().min(2, 'Inserisci un nome valido').optional(),
+  
+  cognome: z.string().min(2, 'Inserisci un cognome valido').optional(),
+  limiteCopie: z.number().min(0, 'Il limite di copie deve essere almeno 0').optional(),
+}).strict();
+
+// --- Registrazione (setup istituto + admin, email sempre obbligatoria) ---
+export const registerSchema = z.object({
+  email: z.email('Formato email non valido'),
+  password: z.string().min(8, 'La password deve essere di almeno 8 caratteri'),
+});
+
+// --- Creazione utente (admin crea un nuovo utente dal pannello) ---
+// Se ruolo è 'admin' → serve email
+// Se ruolo è 'collaboratore' → serve username (senza @)
+
+
+export const createUtenteSchema = z.discriminatedUnion('ruolo', [
+  z.object({
+    ruolo: z.literal('admin'),
+    email: z.email('Formato email non valido'),
+    password: z.string().min(8, 'La password deve essere di almeno 8 caratteri'),
+  }),
+  z.object({
+    ruolo: z.literal('collaboratore'),
+    username: z.string()
+      .min(3, 'Il username deve essere lungo almeno 3 caratteri')
+      .refine((val) => !val.includes('@'), { message: 'Il username non può contenere @' }),
+    password: z.string().min(8, 'La password deve essere di almeno 8 caratteri'),
+  }),
+]);
+
+export const modifyUtenteSchema = z.discriminatedUnion('ruolo', [
+  z.object({
+    ruolo: z.literal('admin'),
+    email: z.email('Formato email non valido').optional(),
+    password: z.string().min(8, 'La password deve essere di almeno 8 caratteri').optional(),
+  }).strict(),
+  z.object({
+    ruolo: z.literal('collaboratore'),
+    username: z.string()
+      .min(3, 'Il username deve essere lungo almeno 3 caratteri')
+      .refine((val) => !val.includes('@'), { message: 'Il username non può contenere @' }).optional(),
+    password: z.string().min(8, 'La password deve essere di almeno 8 caratteri').optional(),
+  }).strict(),
+]);
+
+// --- Login (un campo identificativo: email o username) ---
+export const loginSchema = z.object({
+  identifier: z.string().min(1, 'Inserisci email o username'),
+  password: z.string().min(1, 'La password è obbligatoria'),
+});
+
+// --- Registrazione copie ---
+export const insertRegistrazioneSchema = z.object({
+  docenteId: z.number(),
+  copieEffettuate: z.number().positive('Le copie devono essere almeno 1'),
+  utenteId: z.uuid(),
+  note: z.string().optional(),
+});
+
+export const docentiQuerySchema = z.object({
+  page: z.coerce.number().int().positive().catch(1).default(1),
+  pageSize: z.coerce.number().int().positive().max(100).catch(20).default(20),
+  nome: z.string().optional(),
+  cognome: z.string().optional(),
+  sortField: z.enum(['nome', 'cognome', 'limiteCopie', 'copieEffettuate', 'copieRimanenti']).optional(),
+  sortOrder: z.enum(['asc', 'desc']).optional().default('asc'),
+  
+})
+export const registrazioniCopieQuerySchema = z.object({
+  page: z.coerce.number().int().positive().catch(1).default(1),
+  pageSize: z.coerce.number().int().positive().max(100).catch(20).default(20),
+  docenteId: z.number().optional(),
+  utenteId: z.uuid().optional(),
+  sortField: z.enum(['docenteId', 'utenteId', 'createdAt', 'updatedAt']).optional(),
+  sortOrder: z.enum(['asc', 'desc']).optional().default('asc'),
+})
+export const utentiQuerySchema = z.object({
+  page: z.coerce.number().int().positive().catch(1).default(1),
+  pageSize: z.coerce.number().int().positive().max(100).catch(20).default(20),
+  username: z.string().optional(),
+  email: z.string().optional(),
+  ruolo: z.enum(['admin', 'collaboratore']).optional(),
+  sortField: z.enum(['username', 'email', 'ruolo']).optional(),
+  sortOrder: z.enum(['asc', 'desc']).optional().default('asc'),
+  
+})
+
+// --- Validazione parametri route ---
+// Schema per validare ID numerici dai parametri della route (es. docenti)
+export const idParamSchema = z.object({
+  id: z.coerce.number().int().positive('L\'ID deve essere un numero intero positivo'),
+});
+
+// Schema per validare ID UUID dai parametri della route (es. utenti)
+export const uuidParamSchema = z.object({
+  id: z.uuid('L\'ID deve essere un UUID valido'),
+});
+
+export const refreshTokenSchema = z.object({
+ refreshToken: z.string().length(64, 'Il refresh token deve essere lungo 64 caratteri').regex(/^[a-f0-9]+$/, 'Il refresh token deve essere un valore esadecimale'),
+});
+
+
+
+// --- Tipi derivati dagli schema ---
+export type RefreshToken = z.infer<typeof refreshTokenSchema>;
+export type InsertIstituto = z.infer<typeof insertIstitutoSchema>;
+export type InsertDocente = z.infer<typeof insertDocenteSchema>;
+export type RegisterData = z.infer<typeof registerSchema>;
+export type CreateUtente = z.infer<typeof createUtenteSchema>;
+export type ModifyUtente = z.infer<typeof modifyUtenteSchema>
+export type ModifyDocente = z.infer<typeof modifyDocenteSchema>;
+export type LoginData = z.infer<typeof loginSchema>;
+export type InsertRegistrazione = z.infer<typeof insertRegistrazioneSchema>;
+export type DocentiQuery = z.infer<typeof docentiQuerySchema>;
+export type RegistrazioniCopieQuery = z.infer<typeof registrazioniCopieQuerySchema>;
+export type UtentiQuery = z.infer<typeof utentiQuerySchema>;
+export type IdParam = z.infer<typeof idParamSchema>;
+export type UuidParam = z.infer<typeof uuidParamSchema>;
