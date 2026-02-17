@@ -7,14 +7,15 @@ import type { ErrorWithStatus } from "../middleware/auth.js";
 import bcrypt from 'bcrypt';
 import type { NeonHttpDatabase } from "drizzle-orm/neon-http";
 import * as schema from "./schema.js";
+import { buildPagination } from "./utils/pagination.js";
+import { wouldExceedLimit } from "./utils/limiti.js";
+import { stripUndefined } from "./utils/object.js";
+import { getSort } from "./utils/sort.js";
+import { isEmailIdentifier } from "./utils/auth.js";
 
 // Tipo helper per estrarre il tipo della transazione dal database
 type DbInstance = NeonHttpDatabase<typeof schema>;
 type Transaction = Parameters<Parameters<DbInstance['transaction']>[0]>[0];
-
-const getSort = (column: AnyColumn | SQL, order: SortOrder) => {
-    return order === 'asc' ? asc(column) : desc(column);
-}
 export const createTenantStore = (istitutoId: number, db: DbInstance | Transaction) => {
 
     const docentiStore = {
@@ -33,7 +34,7 @@ export const createTenantStore = (istitutoId: number, db: DbInstance | Transacti
                 const copieSubquery = db
                     .select({
                         docenteId: registrazioniCopie.docenteId,
-                        totaleCopie: sql<number>`SUM(${registrazioniCopie.copieEffettuate})::int`
+                        totaleCopie: sql<number>`SUM(${registrazioniCopie.copieEffettuate})::int`.as('totale_copie')
                     })
                     .from(registrazioniCopie)
                     .where(eq(registrazioniCopie.istitutoId, istitutoId))
@@ -44,10 +45,10 @@ export const createTenantStore = (istitutoId: number, db: DbInstance | Transacti
                     nome: docenti.nome,
                     cognome: docenti.cognome,
                     limiteCopie: docenti.limiteCopie,
-                    copieEffettuate: copieSubquery.totaleCopie,
-                    copieRimanenti: sql<number>`GREATEST(0, ${docenti.limiteCopie} - COALESCE(${copieSubquery.totaleCopie}, 0))::int`
-
-
+                    // Aliased fields (totaleCopie) non sono visti da TS come SQL,
+                    // quindi li castiamo esplicitamente a SQL per soddisfare il tipo.
+                    copieEffettuate: copieSubquery.totaleCopie as unknown as SQL,
+                    copieRimanenti: sql<number>`GREATEST(0, ${docenti.limiteCopie} - COALESCE(${copieSubquery.totaleCopie}, 0))::int` as unknown as SQL,
                 }
                 const sortKey = (sortField || 'nome') as DocentiSort['field'];
                 const orderByColumn = sortMap[sortKey];
@@ -71,16 +72,10 @@ export const createTenantStore = (istitutoId: number, db: DbInstance | Transacti
                 
                 const [totalCount] = await db.select({valore:sql`count(*)::int`}).from(docenti).where(and(...conditions));
 
+                const totalItems = Number(totalCount?.valore ?? 0);
                 const response: DocentiPaginatedResponse = {
                     data: result,
-                    pagination: {
-                       page,
-                       pageSize,
-                       totalItems: Number(totalCount?.valore ?? 0),
-                       totalPages: Math.ceil(Number(totalCount?.valore ?? 0) / pageSize),
-                       hasNextPage: page < Math.ceil(Number(totalCount?.valore ?? 0) / pageSize),
-                       hasPreviousPage: page > 1,
-                    }
+                    pagination: buildPagination(page, pageSize, totalItems),
                 }
 
                 return response;
@@ -105,9 +100,7 @@ export const createTenantStore = (istitutoId: number, db: DbInstance | Transacti
                     updatedAt: new Date(),
                 };
                 Object.assign(updateValues, validateData);
-                const cleanUpdateValues = Object.fromEntries(
-                    Object.entries(updateValues).filter(([, v]) => v !== undefined)
-                )
+                const cleanUpdateValues = stripUndefined(updateValues);
                 const [docenteAggiornato] = await db
                 .update(docenti)
                 .set(cleanUpdateValues)
@@ -152,7 +145,7 @@ export const createTenantStore = (istitutoId: number, db: DbInstance | Transacti
                     error.status = 404;
                     throw error;
                 }
-                if( stats.copieEffettuate + nuoveCopie > stats.limite) {
+                if (wouldExceedLimit(stats.copieEffettuate, nuoveCopie, stats.limite)) {
                     const error = new Error('Limite di copie superato') as ErrorWithStatus;
                     error.status = 400;
                     throw error;
@@ -166,12 +159,13 @@ export const createTenantStore = (istitutoId: number, db: DbInstance | Transacti
         docenti: docentiStore,
         utenti: {
             getPaginated: async(query: UtentiQuery) => {
-                const { page, pageSize, username, email, ruolo, sortField, sortOrder } = utentiQuerySchema.parse(query);
+                const { page, pageSize, identifier, ruolo, sortField, sortOrder } = utentiQuerySchema.parse(query);
                 const offset = (page - 1 ) * pageSize;
+                const isEmail = identifier ? isEmailIdentifier(identifier) : false;
 
                 const condition = [eq(utenti.istitutoId, istitutoId)];
-                if(username) condition.push(ilike(utenti.username, `%${username}%`));
-                if(email) condition.push(ilike(utenti.email, `%${email}%`));
+                if(isEmail) condition.push(ilike(utenti.email, `%${identifier}%`));
+                if(!isEmail) condition.push(ilike(utenti.username, `%${identifier}%`));
                 if(ruolo) condition.push(eq(utenti.ruolo, ruolo));
 
                 const sortMap: Record<UtentiSort['field'], AnyColumn | SQL> = {
@@ -198,18 +192,12 @@ export const createTenantStore = (istitutoId: number, db: DbInstance | Transacti
 
                 const [totalCount] = await db.select({valore: sql`count(*)::int`}).from(utenti).where(and(...condition));
 
+                const totalItems = Number(totalCount?.valore ?? 0);
                 const response: UtentiPaginatedResponse = {
                     // Type assertion sicuro: il constraint del database garantisce che
                     // admin ha email non-null e collaboratore ha username non-null
                     data: result as Utente[],
-                    pagination: {
-                        page,
-                        pageSize,
-                        totalItems: Number(totalCount?.valore ?? 0),
-                        totalPages: Math.ceil(Number(totalCount?.valore ?? 0) / pageSize),
-                        hasNextPage: page < Math.ceil(Number(totalCount?.valore ?? 0) / pageSize),
-                        hasPreviousPage: page > 1,
-                    }
+                    pagination: buildPagination(page, pageSize, totalItems),
                 }
                 return response;
             },
@@ -297,9 +285,7 @@ export const createTenantStore = (istitutoId: number, db: DbInstance | Transacti
                 }
                 const {password, ruolo, ...rest} = validateData;
                 Object.assign(updateValues, rest);
-                const cleanUpdateValues = Object.fromEntries(
-                    Object.entries(updateValues).filter(([, v]) => v !== undefined)
-                )
+                const cleanUpdateValues = stripUndefined(updateValues);
                 
                 const [utenteAggiornato] = await db.update(utenti).set(
                     cleanUpdateValues
@@ -351,16 +337,10 @@ export const createTenantStore = (istitutoId: number, db: DbInstance | Transacti
 
                 const [totalCount] = await db.select({valore: sql`count(*)::int`}).from(registrazioniCopie).where(and(...condition));
 
+                const totalItems = Number(totalCount?.valore ?? 0);
                 const response: RegistrazioniCopiePaginatedResponse = {
                     data: registrazioniPaginated,
-                    pagination: {
-                        page,
-                        pageSize,
-                        totalItems: Number(totalCount?.valore ?? 0),
-                        totalPages: Math.ceil(Number(totalCount?.valore ?? 0) / pageSize),
-                        hasNextPage: page < Math.ceil(Number(totalCount?.valore ?? 0) / pageSize),
-                        hasPreviousPage: page > 1,
-                    }
+                    pagination: buildPagination(page, pageSize, totalItems),
                 }
                 return response;
 
@@ -402,7 +382,7 @@ export const createTenantStore = (istitutoId: number, db: DbInstance | Transacti
                     error.status = 404;
                     throw error;
                 }
-                return registrazioneEliminata.id;
+                return registrazioneEliminata;
             }
         }
     }
