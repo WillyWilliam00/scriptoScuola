@@ -25,9 +25,15 @@ app.use('/api/docenti', authMiddleware, tenantStoreMiddleware, docentiRoutes);
 app.use('/api/utenti', authMiddleware, tenantStoreMiddleware, requireRole('admin'), utentiRoutes);
 
 // Registrazioni Copie: accessibili a admin e collaboratori
-app.use('/api/registrazioni-copie', authMiddleware, tenantStoreMiddleware, requireRole('admin'), registrazioniCopieRoutes);
+app.use('/api/registrazioni-copie', authMiddleware, tenantStoreMiddleware, registrazioniCopieRoutes);
 app.use(errorHandler);
 
-app.listen(PORT, () => {
-    console.log(`Server is running on port ${PORT}`);
-});
+// Esporta l'app per i test di integrazione
+export { app };
+
+// Avvia il server solo se non siamo in ambiente di test
+if (process.env.NODE_ENV !== 'test') {
+    app.listen(PORT, () => {
+        console.log(`Server is running on port ${PORT}`);
+    });
+}

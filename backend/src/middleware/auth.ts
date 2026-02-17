@@ -2,6 +2,7 @@ import jwt from 'jsonwebtoken';
 import type { Request, Response, NextFunction } from 'express';
 import type { JwtPayload } from '../../../shared/types.js';
 import { ZodError } from 'zod';
+import { extractBearerToken } from '../db/utils/extractBearerToken.js';
 
 
 export const asyncHandler = (fn: any) => (req: Request, res: Response, next: NextFunction) => {
@@ -25,7 +26,7 @@ export interface ErrorWithStatus extends Error {
 export const JWT_SECRET = process.env.JWT_SECRET!
 
 export function authMiddleware(req: Request, res: Response, next: NextFunction) {
-    const token = req.headers.authorization?.replace('Bearer ', '');
+    const token = extractBearerToken(req.headers.authorization);
     if(!token) {
         res.status(401).json({ error: 'Token mancante' });
         return

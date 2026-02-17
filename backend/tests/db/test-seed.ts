@@ -1,6 +1,6 @@
 import bcrypt from 'bcrypt';
 import { testDb } from './test-setup.js';
-import { istituti, utenti, docenti, registrazioniCopie } from './schema.js';
+import { istituti, utenti, docenti, registrazioniCopie } from '../../src/db/schema.js';
 
 /**
  * Crea dati di test nel database
@@ -114,3 +114,4 @@ export const testCredentials = {
     password: 'password123',
   },
 };
+

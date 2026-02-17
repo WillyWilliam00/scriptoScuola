@@ -53,7 +53,8 @@ Il backend di **CopyTrack** espone una serie di **API REST** multi‑tenant per 
   - estrarre e verificare il JWT,
   - applicare `requireRole('admin')` o altri ruoli,
   - gestire gli errori applicativi.
-- `src/db/test-setup.ts`, `src/db/test-seed.ts`, `src/route/*.integration.test.ts`: setup e test di integrazione.
+- `tests/db/test-setup.ts`, `tests/db/test-seed.ts`: setup e seed del database di test.
+- `tests/routes/*.integration.test.ts`, `tests/middleware/*.test.ts`, `tests/db/utils/*.test.ts`: test di integrazione delle rotte e test di unità sugli helper di backend.
 
 ### Rotte principali
 
@@ -198,11 +199,23 @@ cd backend
 npm test
 ```
 
-I test di integrazione (`src/route/*.integration.test.ts`) usano Vitest + Supertest e coprono:
-- autenticazione (`/api/auth`),
-- gestione docenti,
-- gestione utenti,
-- registrazioni copie.
+I test usano **Vitest + Supertest** e sono organizzati nella cartella `tests/`:
+- `tests/routes/`: test di integrazione per le principali rotte API
+- `tests/middleware/`: test per middleware come `auth`
+- `tests/db/utils/`: test unitari per gli helper di accesso dati (paginazione, sort, limiti, ecc.)
+- `tests/db/`: setup e seed del database di test (`test-setup.ts`, `test-seed.ts`)
+- `tests/utils/`: helper condivisi per i test (es. `test-helpers.ts`)
+
+Le rotte principali coperte dai test di integrazione sono:
+- autenticazione (`/api/auth`)
+- gestione docenti (`/api/docenti`)
+- gestione utenti (`/api/utenti`)
+- registrazioni copie (`/api/registrazioni-copie`)
+
+**Configurazione dei test:**
+- I test di integrazione vengono eseguiti in sequenza (`singleFork: true` in `vitest.config.ts`) per evitare conflitti quando più suite accedono al database condiviso
+- Il database viene pulito con `TRUNCATE CASCADE` prima di ogni suite di test tramite `cleanTestDb()` in `tests/db/test-setup.ts`
+- I dati di test vengono popolati tramite `seedTestData()` in `tests/db/test-seed.ts`
 
 ### Note architetturali
 

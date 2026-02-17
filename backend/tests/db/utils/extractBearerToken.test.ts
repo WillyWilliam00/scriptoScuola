@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { extractBearerToken } from './extractBearerToken.js';
+import { extractBearerToken } from '../../../src/db/utils/extractBearerToken.js';
 
 describe('extractBearerToken', () => {
   it('restituisce null se authorization è undefined', () => {
@@ -35,3 +35,4 @@ describe('extractBearerToken', () => {
     expect(extractBearerToken(`Bearer ${token}`)).toBe(token);
   });
 });
+

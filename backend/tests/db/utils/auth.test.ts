@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { isEmailIdentifier } from '../db/utils/auth.js';
+import { isEmailIdentifier } from '../../../src/db/utils/auth.js';
 
 describe('isEmailIdentifier', () => {
   it('restituisce true per email valida', () => {
@@ -46,3 +46,4 @@ describe('isEmailIdentifier', () => {
     expect(isEmailIdentifier('username@')).toBe(true);
   });
 });
+

@@ -1,7 +1,8 @@
 import 'dotenv/config';
 import { drizzle } from 'drizzle-orm/node-postgres';
 import { Pool } from 'pg';
-import * as schema from './schema.js';
+import { sql } from 'drizzle-orm';
+import * as schema from '../../src/db/schema.js';
 
 /**
  * Crea una connessione al database di test
@@ -16,14 +17,24 @@ export const testDb = drizzle(pool, { schema });
 /**
  * Pulisce tutte le tabelle del database di test
  * Utile per resettare il DB prima/dopo i test
+ * 
+ * Usa TRUNCATE CASCADE per eliminare tutti i dati rispettando le foreign key:
+ * - TRUNCATE elimina tutti i dati dalle tabelle
+ * - CASCADE elimina automaticamente i dati dalle tabelle dipendenti
+ * - RESTART IDENTITY resetta i contatori degli ID auto-incrementali
  */
 export async function cleanTestDb() {
-  
-  
- //esistono le foreign key constraints e le sfruttiamo per eliminare i dati
-  await testDb.delete(schema.refreshTokens);
-  await testDb.delete(schema.istituti);
-  
+  // TRUNCATE CASCADE elimina tutti i dati rispettando le foreign key
+  // L'ordine delle tabelle non è critico con CASCADE, ma le elenchiamo per chiarezza
+  await testDb.execute(sql`
+    TRUNCATE TABLE 
+      refresh_tokens,
+      registrazioni_copie,
+      docenti,
+      utenti,
+      istituti
+    RESTART IDENTITY CASCADE
+  `);
 }
 
 /**
@@ -35,3 +46,4 @@ export async function cleanTestDb() {
 export async function closeTestDb() {
   await pool.end();
 }
+

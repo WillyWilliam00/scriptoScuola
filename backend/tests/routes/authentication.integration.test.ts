@@ -1,9 +1,9 @@
 import { describe, it, expect, beforeAll, afterAll, beforeEach } from 'vitest';
 import request from 'supertest';
-import { app } from '../index.js';
+import { app } from '../../src/index.js';
 import { cleanTestDb, testDb } from '../db/test-setup.js';
 import { seedTestData, testCredentials } from '../db/test-seed.js';
-import { refreshTokens } from '../db/schema.js';
+import { refreshTokens } from '../../src/db/schema.js';
 import { eq } from 'drizzle-orm';
 
 describe('POST /api/auth/login', () => {
@@ -242,7 +242,7 @@ describe('POST /api/auth/logout', () => {
     const timeDiff = now.getTime() - revokedAtDate.getTime();
     const secondsDiff = timeDiff / 1000;
     
-    // La data deve essere stata impostata "da poco".
+    // La data deve essere stata impostata \"da poco\".
     // Nota: teniamo una finestra più larga per evitare flakiness su macchine lente/CI.
     expect(secondsDiff).toBeGreaterThanOrEqual(0);
     expect(secondsDiff).toBeLessThan(30);
@@ -250,7 +250,7 @@ describe('POST /api/auth/logout', () => {
 
   it('restituisce 200 anche se il token non esiste (idempotente)', async () => {
     // Prova a fare logout con un token inesistente MA valido per lo schema (64 char esadecimali).
-    // Se usi un token "sporco" (es. 'token_inesistente') lo schema lo blocca prima e ottieni 400.
+    // Se usi un token \"sporco\" (es. 'token_inesistente') lo schema lo blocca prima e ottieni 400.
     const res = await request(app)
       .post('/api/auth/logout')
       .send({
@@ -357,3 +357,4 @@ describe('POST /api/auth/refresh', () => {
     expect(res.status).toBe(400);
   });
 });
+

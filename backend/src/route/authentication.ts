@@ -11,6 +11,7 @@ import { JWT_SECRET } from '../middleware/auth.js';
 import { createTenantStore } from '../db/tenantStore.js';
 import crypto from 'crypto';
 import type { LoginResponse, RefreshTokenResponse } from '../../../shared/types.js';
+import { isEmailIdentifier } from '../db/utils/auth.js';
 const router = express.Router();
 
 const ACCESS_TOKEN_EXPIRATION = '15m';
@@ -67,7 +68,7 @@ router.post('/setup-scuola', asyncHandler(async (req: Request, res: Response) =>
 
 router.post('/login', asyncHandler(async (req: Request, res: Response) => {
     const { identifier, password }: LoginData = loginSchema.parse(req.body)
-    const isEmail = identifier.includes('@')
+    const isEmail = isEmailIdentifier(identifier)
     const [utente] = await db.select().from(utenti)
         .where(
             isEmail ?

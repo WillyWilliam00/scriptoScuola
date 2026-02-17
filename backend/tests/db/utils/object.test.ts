@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { stripUndefined } from './object.js';
+import { stripUndefined } from '../../../src/db/utils/object.js';
 
 describe('stripUndefined', () => {
   it('rimuove chiavi con valore undefined', () => {
@@ -50,3 +50,4 @@ describe('stripUndefined', () => {
     expect(result).toEqual({});
   });
 });
+

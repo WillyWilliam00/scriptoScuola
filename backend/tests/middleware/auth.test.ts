@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import type { Request, Response, NextFunction } from 'express';
-import { requireRole, errorHandler, type ErrorWithStatus } from './auth.js';
+import { requireRole, errorHandler, type ErrorWithStatus } from '../../src/middleware/auth.js';
 import { ZodError, z } from 'zod';
 
 describe('requireRole', () => {
@@ -165,3 +165,4 @@ describe('errorHandler', () => {
     expect(mockRes.json).toHaveBeenCalledWith({ error: 'Non autorizzato' });
   });
 });
+

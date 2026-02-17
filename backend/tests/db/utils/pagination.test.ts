@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { buildPagination } from './pagination.js';
+import { buildPagination } from '../../../src/db/utils/pagination.js';
 
 describe('buildPagination', () => {
   it('calcola correttamente con totalItems = 0 (pagina vuota)', () => {
@@ -62,3 +62,4 @@ describe('buildPagination', () => {
     expect(result.hasPreviousPage).toBe(true);
   });
 });
+

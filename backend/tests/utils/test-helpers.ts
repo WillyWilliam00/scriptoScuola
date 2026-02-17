@@ -1,6 +1,6 @@
 import { expect } from 'vitest';
 import request from 'supertest';
-import { app } from '../index.js';
+import { app } from '../../src/index.js';
 import { testCredentials } from '../db/test-seed.js';
 
 /**
@@ -42,3 +42,4 @@ export async function loginAsCollaboratore() {
     utente: res.body.utente,
   };
 }
+

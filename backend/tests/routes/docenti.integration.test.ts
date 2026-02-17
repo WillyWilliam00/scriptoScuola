@@ -1,11 +1,11 @@
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import request from 'supertest';
-import { app } from '../index.js';
+import { app } from '../../src/index.js';
 import { cleanTestDb, testDb } from '../db/test-setup.js';
-import { seedTestData, testCredentials } from '../db/test-seed.js';
-import { istituti, docenti, utenti } from '../db/schema.js';
+import { seedTestData } from '../db/test-seed.js';
+import { istituti } from '../../src/db/schema.js';
 import { eq } from 'drizzle-orm';
-import { loginAsAdmin, loginAsCollaboratore } from './test-helpers.js';
+import { loginAsAdmin, loginAsCollaboratore } from '../utils/test-helpers.js';
 
 describe('Rotte /api/docenti', () => {
   beforeAll(async () => {
@@ -28,9 +28,10 @@ describe('Rotte /api/docenti', () => {
     expect(res.body).toHaveProperty('data');
     expect(Array.isArray(res.body.data)).toBe(true);
     // Campi tipici della paginazione (non troppo rigidi)
-    expect(res.body).toHaveProperty('page');
-    expect(res.body).toHaveProperty('pageSize');
-    expect(res.body).toHaveProperty('totalItems');
+    expect(res.body).toHaveProperty('pagination');
+    expect(res.body.pagination).toHaveProperty('page');
+    expect(res.body.pagination).toHaveProperty('pageSize');
+    expect(res.body.pagination).toHaveProperty('totalItems');
   });
 
   it('GET /api/docenti senza token restituisce 401', async () => {
@@ -39,7 +40,7 @@ describe('Rotte /api/docenti', () => {
   });
 
   it('POST /api/docenti/new-docente crea un docente (solo admin)', async () => {
-    const token = await loginAsAdmin();
+    const { token } = await loginAsAdmin();
 
     const res = await request(app)
       .post('/api/docenti/new-docente')
@@ -74,7 +75,7 @@ describe('Rotte /api/docenti', () => {
   });
 
   it('PUT /api/docenti/update-docente/:id aggiorna un docente (solo admin)', async () => {
-    const token = await loginAsAdmin();
+    const { token } = await loginAsAdmin();
 
     // Prendiamo un id esistente dalla lista
     const listRes = await request(app)
@@ -126,8 +127,8 @@ describe('Rotte /api/docenti', () => {
   });
 
   it('DELETE /api/docenti/delete-docente/:id con collaboratore restituisce 403', async () => {
-    const token = await loginAsCollaboratore();
-    const adminToken = await loginAsAdmin();
+    const { token } = await loginAsCollaboratore();
+    const { token: adminToken } = await loginAsAdmin();
     //creiamo un docente con l'admin
     const createRes = await request(app)
       .post('/api/docenti/new-docente')
@@ -145,6 +146,7 @@ describe('Rotte /api/docenti', () => {
       .set('Authorization', `Bearer ${token}`);
     expect(res.status).toBe(403);
   });
+
   it('PUT /api/docenti/update-docente/:id con collaboratore restituisce 403', async () => {
     const { token } = await loginAsCollaboratore();
     const { token: adminToken } = await loginAsAdmin();

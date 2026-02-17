@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { getSort } from './sort.js';
+import { getSort } from '../../../src/db/utils/sort.js';
 import { sql } from 'drizzle-orm';
 
 describe('getSort', () => {
@@ -37,3 +37,4 @@ describe('getSort', () => {
     expect(typeof result2).toBe('object');
   });
 });
+

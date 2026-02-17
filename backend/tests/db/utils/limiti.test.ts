@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { wouldExceedLimit } from './limiti.js';
+import { wouldExceedLimit } from '../../../src/db/utils/limiti.js';
 
 describe('wouldExceedLimit', () => {
   it('restituisce false quando si è sotto il limite', () => {
@@ -34,3 +34,4 @@ describe('wouldExceedLimit', () => {
     expect(wouldExceedLimit(0, 1, 1000)).toBe(false);
   });
 });
+

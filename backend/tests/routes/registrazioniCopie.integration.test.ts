@@ -1,9 +1,9 @@
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import request from 'supertest';
-import { app } from '../index.js';
+import { app } from '../../src/index.js';
 import { cleanTestDb } from '../db/test-setup.js';
 import { seedTestData } from '../db/test-seed.js';
-import { loginAsAdmin, loginAsCollaboratore } from './test-helpers.js';
+import { loginAsAdmin, loginAsCollaboratore } from '../utils/test-helpers.js';
 
 describe('Rotte /api/registrazioni-copie', () => {
   beforeAll(async () => {
@@ -44,7 +44,6 @@ describe('Rotte /api/registrazioni-copie', () => {
     expect(res.status).toBe(401);
   });
 
- 
   it('POST /api/registrazioni-copie/new-registrazione crea registrazione con admin', async () => {
     const { token: adminToken, utente: adminUtente } = await loginAsAdmin();
 
@@ -84,8 +83,7 @@ describe('Rotte /api/registrazioni-copie', () => {
     expect(docentiRes.status).toBe(200);
     expect(docentiRes.body.data.length).toBeGreaterThan(0);
     const docenteId = docentiRes.body.data[0].id;
-    console.log('docentiRes', docentiRes.body);
-    console.log('docenteId', docenteId);
+
     const res = await request(app)
       .post('/api/registrazioni-copie/new-registrazione')
       .set('Authorization', `Bearer ${collaboratoreToken}`)
@@ -145,30 +143,6 @@ describe('Rotte /api/registrazioni-copie', () => {
     expect(deleteRes.status).toBe(200);
     expect(deleteRes.body).toHaveProperty('id');
     expect(deleteRes.body.id).toBe(registrazioneId);
-    console.log(deleteRes.body);
   });
-  // it('DELETE /api/registrazioni-copie/delete-registrazione/:id con collaboratore restituisce 403', async () => {
-  //   const { token: adminToken } = await loginAsAdmin();
-  //   const { token: collaboratoreToken } = await loginAsCollaboratore();
-  //   const registrazioniRes = await request(app)
-  //     .post('/api/registrazioni-copie/new-registrazione')
-  //     .set('Authorization', `Bearer ${adminToken}`)
-  //     .send({
-  //       docenteId: 1,
-  //       copieEffettuate: 10,
-  //       utenteId: '123e4567-e89b-12d3-a456-426614174000',
-  //       note: 'Test registrazione admin',
-  //     });
-  //   expect(registrazioniRes.status).toBe(201);
-  //   console.log(registrazioniRes.body);
-  //   const registrazioneId = registrazioniRes.body.id;
-
-  //   const deleteRes = await request(app)
-  //     .delete(`/api/registrazioni-copie/delete-registrazione/${registrazioneId}`)
-  //     .set('Authorization', `Bearer ${collaboratoreToken}`);
-  //   expect(deleteRes.status).toBe(403);
-  // });
-
-
 });
 
