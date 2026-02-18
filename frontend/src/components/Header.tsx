@@ -7,7 +7,7 @@ export default function Header() {
     const { open, isMobile } = useSidebar()
     return (
         <header className={cn(
-            "fixed top-0 w-full h-14 bg-white flex items-center justify-start gap-2 px-4 shadow-md transition-all duration-200 ease-linear",
+            "fixed top-0 w-full h-14 bg-white flex items-center justify-start gap-2 px-4 shadow-md transition-all duration-200 ease-linear z-50",
             // Su mobile la sidebar è un drawer overlay, non sposta il layout: header sempre a sinistra
             isMobile ? "left-0" : (open ? "left-64" : "left-0")
         )}>

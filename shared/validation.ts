@@ -153,6 +153,29 @@ export const insertDocenteFormSchema = z.object({
     ),
 });
 
+/**
+ * Schema per import bulk di docenti con copie già effettuate
+ * Usato per importare docenti da file Excel
+ * NOTA: istitutoId NON è incluso perché viene preso automaticamente dal token JWT nel backend
+ */
+export const bulkImportDocentiSchema = z.object({
+  docenti: z.array(
+    z.object({
+      nome: z.string().min(2, 'Inserisci un nome valido'),
+      cognome: z.string().min(2, 'Inserisci un cognome valido'),
+      limiteCopie: z.number().min(0, 'Il limite di copie deve essere almeno 0'),
+      copieEffettuate: z.number().min(0, 'Le copie effettuate devono essere almeno 0').default(0),
+      note: z.string().optional(),
+    }).refine(
+      (data) => data.copieEffettuate <= data.limiteCopie,
+      {
+        message: 'Le copie effettuate non possono superare il limite di copie',
+        path: ['copieEffettuate'],
+      }
+    )
+  ).min(1, 'Devi inserire almeno un docente'),
+});
+
 export const docentiQuerySchema = z.object({
   page: z.coerce.number().int().positive().min(1).catch(1).default(1),
   pageSize: z.coerce.number().int().positive().max(100).catch(20).default(20),
@@ -211,3 +234,4 @@ export type RegistrazioniCopieQuery = z.infer<typeof registrazioniCopieQuerySche
 export type UtentiQuery = z.infer<typeof utentiQuerySchema>;
 export type IdParam = z.infer<typeof idParamSchema>;
 export type UuidParam = z.infer<typeof uuidParamSchema>;
+export type BulkImportDocenti = z.infer<typeof bulkImportDocentiSchema>;

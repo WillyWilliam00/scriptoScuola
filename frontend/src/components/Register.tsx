@@ -3,7 +3,7 @@ import { insertIstitutoSchema, registerSchema } from '../../../shared/validation
 import { Field, FieldContent, FieldGroup, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { CameraIcon } from "@hugeicons/core-free-icons";
+import { CameraIcon, EyeIcon, EyeOff } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
 import Footer from "./Footer";
 import { Link, useNavigate } from "react-router-dom";
@@ -24,7 +24,7 @@ export default function Register() {
   const navigate = useNavigate();
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
-
+  const [showPassword, setShowPassword] = useState(false);
   const form = useForm({
     defaultValues: {
       istituto: {
@@ -44,15 +44,15 @@ export default function Register() {
         // Validazione Zod manuale prima di inviare
         const validatedIstituto = insertIstitutoSchema.parse(value.istituto);
         const validatedUtente = registerSchema.parse(value.utente);
-        
+
         // Chiama API register
         await register(validatedIstituto, validatedUtente);
-        
+
         // Registrazione riuscita, redirect a login con messaggio
-        navigate('/login', { 
-          state: { 
-            message: 'Configurazione completata con successo! Ora puoi accedere.' 
-          } 
+        navigate('/login', {
+          state: {
+            message: 'Configurazione completata con successo! Ora puoi accedere.'
+          }
         });
       } catch (err: any) {
         // Gestione errori Zod o API
@@ -160,15 +160,21 @@ export default function Register() {
                 <Field>
                   <FieldLabel htmlFor="utente-password">Password amministratore</FieldLabel>
                   <FieldContent>
-                    <Input
-                      id="utente-password"
-                      type="password"
-                      placeholder="Inserisci la password (minimo 8 caratteri)"
-                      className="rounded-none h-12"
-                      value={field.state.value}
-                      onChange={(e) => field.handleChange(e.target.value)}
-                      onBlur={field.handleBlur}
-                    />
+                    <div className='flex items-center'>
+                      <Input
+                        id="utente-password"
+                        type={showPassword ? "text" : "password"}
+                        placeholder="Inserisci la password (minimo 8 caratteri)"
+                        className="rounded-none h-12"
+                        value={field.state.value}
+                        onChange={(e) => field.handleChange(e.target.value)}
+                        onBlur={field.handleBlur}
+                      />
+                      <Button type="button" variant="default" size="icon" className='rounded-none h-12 w-12 ' onClick={() => setShowPassword(!showPassword)}>
+                        {showPassword ? <HugeiconsIcon icon={EyeIcon} strokeWidth={2} className="w-4 h-4" /> : <HugeiconsIcon icon={EyeOff} strokeWidth={2} className="w-4 h-4" />}
+                      </Button>
+                    </div>
+
                   </FieldContent>
                 </Field>
               )}

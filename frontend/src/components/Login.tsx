@@ -1,7 +1,7 @@
 import { useForm } from '@tanstack/react-form';
 import { loginSchema } from '../../../shared/validation.js';
 import { Field, FieldContent, FieldGroup, FieldLabel } from "@/components/ui/field";
-import { CameraIcon } from "@hugeicons/core-free-icons";
+import { CameraIcon, EyeIcon, EyeOff } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -25,6 +25,7 @@ export default function Login() {
   const navigate = useNavigate();
   const location = useLocation();
   const [serverError, setServerError] = useState<string | null>(null);
+  const [showPassword, setShowPassword] = useState(false);
 
   // Messaggio di successo da Register (se presente)
   const successMessage = location.state?.message;
@@ -96,13 +97,13 @@ export default function Login() {
                       onChange={(e) => field.handleChange(e.target.value)}
                       onBlur={field.handleBlur}
                     />
-                      {
+                    {
                       field.state.meta.errors.length > 0 && (
-                       field.state.meta.errors.map((error, index) => (
-                        <span key={index} className="text-red-500 text-xs">
-                          {error?.message}
-                        </span>
-                       ))
+                        field.state.meta.errors.map((error, index) => (
+                          <span key={index} className="text-red-500 text-xs">
+                            {error?.message}
+                          </span>
+                        ))
                       )
 
                     }
@@ -118,23 +119,28 @@ export default function Login() {
               {(field) => (
                 <Field>
                   <FieldLabel htmlFor="password">Password</FieldLabel>
-                  <FieldContent>
-                    <Input
-                      id="password"
-                      type="password"
-                      placeholder="Inserisci la password"
-                      className="rounded-none h-12"
-                      value={field.state.value}
-                      onChange={(e) => field.handleChange(e.target.value)}
-                      onBlur={field.handleBlur}
-                    />
+                  <FieldContent className=''>
+                    <div className='flex items-center'>
+                      <Input
+                        id="password"
+                        type={showPassword ? "text" : "password"}
+                        placeholder="Inserisci la password"
+                        className="rounded-none h-12"
+                        value={field.state.value}
+                        onChange={(e) => field.handleChange(e.target.value)}
+                        onBlur={field.handleBlur}
+                      />
+                      <Button type="button" variant="default" size="icon" className='rounded-none h-12 w-12' onClick={() => setShowPassword(!showPassword)}>
+                        {showPassword ? <HugeiconsIcon icon={EyeIcon} strokeWidth={2} className="w-4 h-4" /> : <HugeiconsIcon icon={EyeOff} strokeWidth={2} className="w-4 h-4" />}
+                      </Button>
+                    </div>
                     {
                       field.state.meta.errors.length > 0 && field.state.value.length > 0 && (
-                       field.state.meta.errors.map((error, index) => (
-                        <span key={index} className="text-red-500 text-xs">
-                          {error?.message}
-                        </span>
-                       ))
+                        field.state.meta.errors.map((error, index) => (
+                          <span key={index} className="text-red-500 text-xs">
+                            {error?.message}
+                          </span>
+                        ))
                       )
 
                     }

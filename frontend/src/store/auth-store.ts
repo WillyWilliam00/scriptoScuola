@@ -97,28 +97,39 @@ export const useAuthStore = create<AuthState>()(
        * - Viene chiamato quando l'access token viene rinnovato
        * - Aggiorna solo i token (non i dati utente che rimangono invariati)
        * - Decodifica il nuovo JWT per aggiornare il payload
+       * - Aggiorna isAuthenticated usando la stessa logica di onRehydrateStorage
        */
       refresh: (response: RefreshTokenResponse) => {
         const jwtPayload = decodeJWT(response.token);
+        const currentState = get();
         
         set({
           token: response.token,
-          refreshToken: response.refreshToken || get().refreshToken,
+          refreshToken: response.refreshToken || currentState.refreshToken,
           jwtPayload,
-          // Manteniamo utente e isAuthenticated invariati
+          // Calcoliamo isAuthenticated usando la stessa logica di onRehydrateStorage
+          isAuthenticated: !!response.token && !!currentState.utente,
         });
       },
 
       /**
        * setTokens: aggiorna solo i token (utile per refresh automatico)
+       * 
+       * Spiegazione:
+       * - Viene chiamato dall'interceptor quando fa refresh automatico
+       * - Aggiorna i token e calcola isAuthenticated usando la stessa logica di onRehydrateStorage
+       * - Garantisce coerenza: isAuthenticated è sempre calcolato con !!token && !!utente
        */
       setTokens: (token: string, refreshToken: string) => {
         const jwtPayload = decodeJWT(token);
+        const currentState = get();
         
         set({
           token,
           refreshToken,
           jwtPayload,
+          // Calcoliamo isAuthenticated usando la stessa logica di onRehydrateStorage
+          isAuthenticated: !!token && !!currentState.utente,
         });
       },
 
