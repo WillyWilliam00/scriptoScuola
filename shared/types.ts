@@ -106,6 +106,7 @@ export interface JwtPayload {
   userId: string;
   ruolo: 'admin' | 'collaboratore';
   istitutoId: number;
+  exp?: number;
 }
 
 // --- Risposta login API ---
