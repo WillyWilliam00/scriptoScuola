@@ -286,7 +286,6 @@ export default function GestioneUtenze() {
                       id="username-utente"
                       placeholder="username (senza @)"
                       required={dialogMode === "add"}
-                      disabled={dialogMode === "view"}
                       value={dialogMode === "edit" ? editForm.username : addForm.username}
                       onChange={(e) =>
                         dialogMode === "edit"
