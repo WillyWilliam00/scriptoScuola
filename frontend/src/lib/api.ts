@@ -13,11 +13,41 @@ import type { RefreshTokenResponse } from '../../../shared/types.js';
  * - Response interceptor: intercetta errori 401 e gestisce refresh token automaticamente
  */
 
-// Base URL del backend (può essere sovrascritto da variabile d'ambiente)
-// IMPORTANTE: Il frontend Vite è su porta 3000, quindi il backend deve essere su un'altra porta
-// Se il backend è su porta 3000, cambia la porta del backend a 3001 o configura VITE_API_BASE_URL
-// Esempio: crea un file .env.local nel frontend con VITE_API_BASE_URL=http://localhost:3001/api
-const BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3001/api';
+/**
+ * Determina automaticamente il BASE_URL del backend in base all'hostname corrente
+ * 
+ * Spiegazione:
+ * - Se accedi da localhost (es. http://localhost:3000), usa localhost per il backend
+ * - Se accedi da IP di rete (es. http://192.168.1.53:3000), usa lo stesso IP per il backend
+ * - Questo permette di accedere all'app dal telefono senza configurazioni aggiuntive
+ * - Può essere sovrascritto con la variabile d'ambiente VITE_API_BASE_URL
+ */
+function getBaseUrl(): string {
+  // Se è specificata una variabile d'ambiente, usala (ha priorità)
+  if (import.meta.env.VITE_API_BASE_URL) {
+    return import.meta.env.VITE_API_BASE_URL;
+  }
+
+  // Rileva l'hostname corrente (window.location.hostname)
+  // Se siamo su localhost o 127.0.0.1, usa localhost
+  // Altrimenti usa l'IP corrente (es. 192.168.1.53)
+  if (typeof window !== 'undefined') {
+    const hostname = window.location.hostname;
+    const isLocalhost = hostname === 'localhost' || hostname === '127.0.0.1';
+    
+    if (isLocalhost) {
+      return 'http://localhost:3001/api';
+    } else {
+      // Usa l'IP corrente con la porta del backend
+      return `http://${hostname}:3001/api`;
+    }
+  }
+
+  // Fallback per SSR o ambienti senza window
+  return 'http://localhost:3001/api';
+}
+
+const BASE_URL = getBaseUrl();
 
 // Creiamo l'istanza Axios
 export const api = axios.create({
@@ -173,12 +203,34 @@ api.interceptors.response.use(
 
       return api(originalRequest);
     } catch (refreshError) {
-      // Refresh fallito, logout e redirect
+      // Distinguiamo errori di rete da errori di autenticazione
+      const axiosError = refreshError as AxiosError;
+      const isNetworkError = 
+        !axiosError.response || // Nessuna risposta = errore di rete
+        axiosError.code === 'ECONNABORTED' || // Timeout
+        axiosError.code === 'ERR_NETWORK' || // Network error
+        axiosError.message?.includes('Network Error') ||
+        axiosError.message?.includes('timeout') ||
+        axiosError.message?.includes('ECONNREFUSED');
+
+      // Se è un errore di rete temporaneo, NON fare logout
+      // L'utente potrebbe avere token validi ma problemi di connessione
+      // Processiamo la coda con errore ma manteniamo lo stato corrente
+      if (isNetworkError) {
+        console.warn('Refresh token fallito per errore di rete, mantengo stato corrente:', refreshError);
+        processQueue(axiosError, null);
+        isRefreshing = false;
+        // Rifiutiamo la richiesta originale (l'utente può riprovare quando la connessione torna)
+        return Promise.reject(refreshError);
+      }
+
+      // Se è un errore di autenticazione (401, 403, refresh token scaduto/revocato), fai logout
       // Questo può succedere se:
       // - Il refresh token è scaduto o revocato
       // - L'utente è stato eliminato dal database
-      // - Problemi di connessione
-      processQueue(refreshError as AxiosError, null);
+      // - Il refresh token è invalido
+      console.error('Refresh token fallito per errore di autenticazione:', refreshError);
+      processQueue(axiosError, null);
       useAuthStore.getState().logout();
       
       // Redirect a login se siamo in un contesto browser

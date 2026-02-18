@@ -58,7 +58,7 @@ export function isTokenExpired(token: string): boolean {
   // exp è un campo standard JWT aggiunto automaticamente da jsonwebtoken
   // Se non c'è exp nel payload, potrebbe essere un token senza scadenza (raro)
   // Per sicurezza, consideriamo scaduto se non c'è exp
-  const exp = (payload as JwtPayload & { exp?: number }).exp;
+  const exp = (payload as JwtPayload).exp;
   if (!exp) {
     return true;
   }
