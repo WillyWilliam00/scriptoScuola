@@ -127,15 +127,40 @@ export const createRegistrazioneFormSchema = (limiteCopie: number, copieRimanent
   });
 };
 
+/**
+ * Schema per il form di inserimento docente (solo i campi inseriti dall'utente)
+ * Usato con TanStack Form nel componente frontend
+ * NOTA: istitutoId NON è incluso perché viene preso automaticamente dal token JWT nel backend
+ */
+export const insertDocenteFormSchema = z.object({
+  nome: z.string().min(2, 'Inserisci un nome valido'),
+  cognome: z.string().min(2, 'Inserisci un cognome valido'),
+  limiteCopie: z.string()
+    .min(1, 'Inserisci il limite di copie')
+    .refine(
+      (val) => {
+        const num = Number(val);
+        return !Number.isNaN(num) && Number.isInteger(num);
+      },
+      { message: 'Inserisci un numero intero valido' }
+    )
+    .refine(
+      (val) => {
+        const num = Number(val);
+        return num >= 0;
+      },
+      { message: 'Il limite di copie deve essere almeno 0' }
+    ),
+});
+
 export const docentiQuerySchema = z.object({
   page: z.coerce.number().int().positive().min(1).catch(1).default(1),
   pageSize: z.coerce.number().int().positive().max(100).catch(20).default(20),
   nome: z.string().optional(),
   cognome: z.string().optional(),
-  sortField: z.enum(['nome', 'cognome', 'limiteCopie', 'copieEffettuate', 'copieRimanenti']).optional(),
+  sortField: z.enum(['nome', 'cognome', 'limiteCopie', 'copieEffettuate', 'copieRimanenti', 'createdAt', 'updatedAt']).optional(),
   sortOrder: z.enum(['asc', 'desc']).optional().default('asc'),
-  
-})
+});
 export const registrazioniCopieQuerySchema = z.object({
   page: z.coerce.number().int().positive().catch(1).default(1),
   pageSize: z.coerce.number().int().positive().max(100).catch(20).default(20),

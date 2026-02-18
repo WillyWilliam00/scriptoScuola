@@ -45,6 +45,8 @@ export const createTenantStore = (istitutoId: number, db: DbInstance | Transacti
                     nome: docenti.nome,
                     cognome: docenti.cognome,
                     limiteCopie: docenti.limiteCopie,
+                    createdAt: docenti.createdAt,
+                    updatedAt: docenti.updatedAt,
                     // Aliased fields (totaleCopie) non sono visti da TS come SQL,
                     // quindi li castiamo esplicitamente a SQL per soddisfare il tipo.
                     copieEffettuate: copieSubquery.totaleCopie as unknown as SQL,
@@ -82,6 +84,13 @@ export const createTenantStore = (istitutoId: number, db: DbInstance | Transacti
             },
             create: async (data: Omit<InsertDocente, 'istitutoId'>) => {
                 const { nome, cognome, limiteCopie } = insertDocenteSchema.parse({...data, istitutoId});
+                const docenteEsistente = await db.select().from(docenti).where(and(eq(docenti.nome, nome), eq(docenti.cognome, cognome), eq(docenti.istitutoId, istitutoId)));
+                if (docenteEsistente.length > 0) {
+                    const error = new Error('Docente già esistente') as ErrorWithStatus;
+                    error.status = 400;
+                    throw error;
+                }
+                
                 const [nuovoDocente] = await db
                 .insert(docenti)
                 .values({nome, cognome, limiteCopie, istitutoId})

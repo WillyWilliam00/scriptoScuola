@@ -24,7 +24,8 @@ export default function RegistraCopieContent({
     pageSize: 20,
     nome: queryNome.trim() || undefined,
     cognome: queryCognome.trim() || undefined,
-    sortOrder: "asc",
+    sortOrder: "desc",
+    sortField: "createdAt",
   });
 
   const docenti: DocenteConRegistrazioni[] = data.pages.flatMap((p) => p.data);

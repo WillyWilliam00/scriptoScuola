@@ -21,7 +21,7 @@ export interface DocentiFilters {
   cognome?: string;
 }	
 export interface DocentiSort {
-  field: 'nome' | 'cognome' | 'limiteCopie' | 'copieEffettuate' | 'copieRimanenti';
+  field: 'nome' | 'cognome' | 'limiteCopie' | 'copieEffettuate' | 'copieRimanenti' | 'createdAt' | 'updatedAt';
   order: SortOrder;
 }
 export interface UtentiFilters {
