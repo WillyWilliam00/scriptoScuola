@@ -1,5 +1,9 @@
 {
   "name": "gestione-fotocopie",
   "private": true,
-  "workspaces": ["shared", "frontend", "backend"]
+  "workspaces": [
+    "shared",
+    "frontend",
+    "backend"
+  ]
 }
