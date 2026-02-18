@@ -1,5 +1,5 @@
 import { and, asc, desc, eq, ilike, ne, type AnyColumn } from "drizzle-orm";
-import { createUtenteSchema, docentiQuerySchema, insertDocenteSchema, insertRegistrazioneSchema, modifyDocenteSchema, modifyUtenteSchema, registrazioniCopieQuerySchema, utentiQuerySchema, type CreateUtente, type DocentiQuery, type InsertDocente, type InsertRegistrazione, type ModifyDocente, type ModifyUtente, type RegistrazioniCopieQuery, type UtentiQuery } from "../../../shared/validation.js"
+import { bulkImportDocentiSchema, createUtenteSchema, docentiQuerySchema, insertDocenteSchema, insertRegistrazioneSchema, modifyDocenteSchema, modifyUtenteSchema, registrazioniCopieQuerySchema, utentiQuerySchema, type BulkImportDocenti, type CreateUtente, type DocentiQuery, type InsertDocente, type InsertRegistrazione, type ModifyDocente, type ModifyUtente, type RegistrazioniCopieQuery, type UtentiQuery } from "../../../shared/validation.js"
 import { docenti, registrazioniCopie, utenti } from "./schema.js";
 import type { DocentiPaginatedResponse, DocentiSort, SortOrder, UtentiPaginatedResponse, UtentiSort, Utente, RegistrazioniCopieSort, RegistrazioniCopiePaginatedResponse } from "../../../shared/types.js";
 import { SQL, sql } from "drizzle-orm";
@@ -70,7 +70,7 @@ export const createTenantStore = (istitutoId: number, db: DbInstance | Transacti
                     .where(and(...conditions))
                     .limit(pageSize)
                     .offset(offset)
-                    .orderBy(getSort(orderByColumn, sortOrder))
+                    .orderBy(...getSort(orderByColumn, sortOrder, docenti.id))
                 
                 const [totalCount] = await db.select({valore:sql`count(*)::int`}).from(docenti).where(and(...conditions));
 
@@ -134,6 +134,12 @@ export const createTenantStore = (istitutoId: number, db: DbInstance | Transacti
                 }
                 return docenteEliminato.id
             },
+            deleteAll: async () => {
+                const eliminati = await db.delete(docenti)
+                    .where(eq(docenti.istitutoId, istitutoId))
+                    .returning({ id: docenti.id });
+                return eliminati.length;
+            },
             checkLimiteCopie: async(docenteId: number, nuoveCopie: number, tx?: typeof db) => {
                 const dbInstance = tx || db;
                 const [stats] = await dbInstance
@@ -160,6 +166,72 @@ export const createTenantStore = (istitutoId: number, db: DbInstance | Transacti
                     throw error;
                 }
                 return true;
+            },
+            bulkImportDocenti: async(data: BulkImportDocenti) => {
+                const validateData = bulkImportDocentiSchema.parse(data);
+                const { docenti: docentiDaImportare } = validateData;
+
+                return await db.transaction(async (tx: any) => {
+                    // 1. Recupera tutti i nomi/cognomi per un controllo massivo (evita N SELECT nel loop)
+                    const docentiEsistenti = await tx
+                        .select({ nome: docenti.nome, cognome: docenti.cognome })
+                        .from(docenti)
+                        .where(eq(docenti.istitutoId, istitutoId));
+
+                    const existingSet = new Set(
+                        docentiEsistenti.map((d: { nome: string; cognome: string }) => `${d.nome.toLowerCase()}-${d.cognome.toLowerCase()}`)
+                    );
+
+                    // 2. Valida e prepara i dati per l'inserimento batch
+                    const docentiToInsert = [];
+                    for (const d of docentiDaImportare) {
+                        const key = `${d.nome.toLowerCase()}-${d.cognome.toLowerCase()}`;
+                        if (existingSet.has(key)) {
+                            const error = new Error(`Docente ${d.nome} ${d.cognome} già esistente`) as ErrorWithStatus;
+                            error.status = 400;
+                            throw error;
+                        }
+                        if (d.copieEffettuate > d.limiteCopie) {
+                            const error = new Error(`Limiti superati per ${d.nome} ${d.cognome}`) as ErrorWithStatus;
+                            error.status = 400;
+                            throw error;
+                        }
+                        docentiToInsert.push({
+                            nome: d.nome,
+                            cognome: d.cognome,
+                            limiteCopie: d.limiteCopie,
+                            istitutoId,
+                        });
+                    }
+
+                    // 3. Inserimento massivo docenti
+                    const nuoviDocenti = await tx.insert(docenti).values(docentiToInsert).returning();
+
+                    // 4. Registrazioni copie (ordine preservato: nuoviDocenti[i] corrisponde a docentiDaImportare[i])
+                    const registrazioniToInsert: { docenteId: number; copieEffettuate: number; utenteId: null; note: string | null; istitutoId: number }[] = [];
+                    nuoviDocenti.forEach((nuovo: typeof docenti.$inferSelect, index: number) => {
+                        const dataOriginale = docentiDaImportare[index];
+                        if (dataOriginale && dataOriginale.copieEffettuate > 0) {
+                            registrazioniToInsert.push({
+                                docenteId: nuovo.id,
+                                copieEffettuate: dataOriginale.copieEffettuate,
+                                utenteId: null,
+                                note: dataOriginale.note ?? null,
+                                istitutoId,
+                            });
+                        }
+                    });
+
+                    if (registrazioniToInsert.length > 0) {
+                        await tx.insert(registrazioniCopie).values(registrazioniToInsert);
+                    }
+
+                    return {
+                        docenti: nuoviDocenti,
+                        totaleCreati: nuoviDocenti.length,
+                        totaleConCopie: registrazioniToInsert.length,
+                    };
+                });
             }
         
     }
@@ -199,7 +271,7 @@ export const createTenantStore = (istitutoId: number, db: DbInstance | Transacti
                 .where(and(...condition))
                 .limit(pageSize)
                 .offset(offset)
-                .orderBy(getSort(orderByColumn, sortOrder))
+                .orderBy(...getSort(orderByColumn, sortOrder, utenti.id))
 
                 const [totalCount] = await db.select({valore: sql`count(*)::int`}).from(utenti).where(and(...condition));
 
@@ -343,7 +415,7 @@ export const createTenantStore = (istitutoId: number, db: DbInstance | Transacti
                 .where(and(...condition))
                 .limit(pageSize)
                 .offset(offset)
-                .orderBy(getSort(orderByColumn, sortOrder))
+                .orderBy(...getSort(orderByColumn, sortOrder, registrazioniCopie.id))
              
 
                 const [totalCount] = await db.select({valore: sql`count(*)::int`}).from(registrazioniCopie).where(and(...condition));
@@ -372,6 +444,7 @@ export const createTenantStore = (istitutoId: number, db: DbInstance | Transacti
                         throw error;
                     }
                     await docentiStore.checkLimiteCopie(validateData.docenteId, validateData.copieEffettuate, tx);
+                    
                     const [registrazione] = await tx.insert(registrazioniCopie).values({
                         docenteId: validateData.docenteId,
                         copieEffettuate: validateData.copieEffettuate,
@@ -394,6 +467,9 @@ export const createTenantStore = (istitutoId: number, db: DbInstance | Transacti
                     throw error;
                 }
                 return registrazioneEliminata;
+            },
+            deleteAll: async() => {
+                await db.delete(registrazioniCopie).where(eq(registrazioniCopie.istitutoId, istitutoId));
             }
         }
     }

@@ -33,4 +33,12 @@ router.delete('/delete-registrazione/:id', requireRole('admin'), asyncHandler(as
     res.status(200).json(result);
 }))
 
+router.delete('/delete-all', requireRole('admin'), asyncHandler(async (req: Request, res: Response) => {
+    if(!req.tenantStore) {
+        return res.status(500).json({ error: 'Store non inizializzato' });
+    }
+    await req.tenantStore.registrazioniCopie.deleteAll();
+    res.status(200).json({ message: 'Tutte le registrazioni copie dell\'istituto sono state eliminate.' });
+}))
+
 export default router;

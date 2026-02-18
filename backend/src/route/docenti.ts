@@ -1,7 +1,7 @@
  import express from 'express';
 import { asyncHandler, requireRole } from '../middleware/auth.js';
 import type { Request, Response } from 'express';
-import { docentiQuerySchema, idParamSchema, insertDocenteSchema, type DocentiQuery, type InsertDocente } from '../../../shared/validation.js';
+import { bulkImportDocentiSchema, docentiQuerySchema, idParamSchema, insertDocenteSchema } from '../../../shared/validation.js';
 
 const router = express.Router();
 
@@ -35,6 +35,24 @@ router.post('/new-docente', requireRole('admin'), asyncHandler(async (req: Reque
     res.status(201).json({
         message: 'Docente creato con successo',
         data: nuovoDocente,
+    });
+}));
+
+/**
+ * POST /api/docenti/bulk-import
+ * Importa multipli docenti con copie già effettuate (solo admin)
+ */
+router.post('/bulk-import', requireRole('admin'), asyncHandler(async (req: Request, res: Response) => {
+    if (!req.tenantStore) {
+        return res.status(500).json({ error: 'Store non inizializzato' });
+    }
+
+    const data = bulkImportDocentiSchema.parse(req.body);
+    const result = await req.tenantStore.docenti.bulkImportDocenti(data);
+    
+    res.status(201).json({
+        message: `Import completato: ${result.totaleCreati} docente/i creato/i, ${result.totaleConCopie} con copie già effettuate`,
+        data: result,
     });
 }));
 
@@ -76,6 +94,25 @@ router.delete('/delete-docente/:id', requireRole('admin'), asyncHandler(async (r
     res.status(200).json({
         message: 'Docente eliminato con successo',
         id: idEliminato,
+    });
+}));
+
+/**
+ * DELETE /api/docenti/delete-all
+ * Elimina tutti i docenti del tenant (solo admin). Le registrazioni copie vengono eliminate in cascade.
+ */
+router.delete('/delete-all', requireRole('admin'), asyncHandler(async (req: Request, res: Response) => {
+    if (!req.tenantStore) {
+        return res.status(500).json({ error: 'Store non inizializzato' });
+    }
+
+    const deletedCount = await req.tenantStore.docenti.deleteAll();
+
+    res.status(200).json({
+        message: deletedCount === 0
+            ? 'Nessun docente da eliminare'
+            : `${deletedCount} docente/i eliminato/i con successo`,
+        deletedCount,
     });
 }));
 
