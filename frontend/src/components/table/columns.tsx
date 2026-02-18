@@ -1,9 +1,10 @@
-import type {ColumnDef} from "@tanstack/react-table"
-import { Field, FieldLabel } from "../ui/field"
-import { Progress } from "../ui/progress"
+import type { ColumnDef } from "@tanstack/react-table";
+import { Field, FieldLabel } from "../ui/field";
+import { Progress } from "../ui/progress";
 import { Button } from "../ui/button";
 import { ArrowUpDownIcon, EditIcon, DeleteIcon, EyeIcon } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
+import type { Utente } from "../../../../shared/types.js";
 
 export type Docenti = {
     nome: string;
@@ -12,12 +13,6 @@ export type Docenti = {
     copieRimanenti: number;
     limite: number;
 }
-export type Utenze = {
-    nome: string;
-    cognome: string;
-    ruolo: 'admin' | 'collaboratore';
-}
-
 // Callbacks per azioni CRUD sul singolo docente
 export type DocenteActions = {
     onView?: (docente: Docenti) => void;
@@ -26,9 +21,9 @@ export type DocenteActions = {
 }
 
 export type UtenzeActions = {
-    onView?: (utenza: Utenze) => void;
-    onEdit?: (utenza: Utenze) => void;
-    onDelete?: (utenza: Utenze) => void;
+    onView?: (utenza: Utente) => void;
+    onEdit?: (utenza: Utente) => void;
+    onDelete?: (utenza: Utente) => void;
 }
 
 // Factory per le colonne dei docenti, così possiamo iniettare le callback dal componente feature
@@ -162,41 +157,35 @@ export const createColumnsDocenti = (actions: DocenteActions = {}): ColumnDef<Do
         },
     }
 ]
-export const createColumnsUtenze = (actions: UtenzeActions = {}): ColumnDef<Utenze>[] => [
-    {
-        header: ({column}) => {
-            return (
-                <button className="flex items-center gap-2 text-md cursor-pointer" onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}>
-                    Nome 
-                    <HugeiconsIcon icon={ArrowUpDownIcon} strokeWidth={2} className="size-4" />   
+function utenteIdentifier(u: Utente): string {
+    return u.ruolo === "admin" ? (u as { email: string }).email : (u as { username: string }).username;
+}
 
-                </button>
-            )
-        },
-        accessorKey: "nome",
+export const createColumnsUtenze = (actions: UtenzeActions = {}): ColumnDef<Utente>[] => [
+    {
+        id: "identificativo",
+        header: ({ column }) => (
+            <button
+                className="flex items-center gap-2 text-md cursor-pointer"
+                onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+            >
+                Identificativo
+                <HugeiconsIcon icon={ArrowUpDownIcon} strokeWidth={2} className="size-4" />
+            </button>
+        ),
+        accessorFn: (row) => utenteIdentifier(row),
+        cell: ({ row }) => utenteIdentifier(row.original),
     },
     {
-        header: ({column}) => {
-            return (
-                <button className="flex items-center gap-2 text-md cursor-pointer" onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}>
-                    Cognome 
-                    <HugeiconsIcon icon={ArrowUpDownIcon} strokeWidth={2} className="size-4" />   
-
-                </button>
-            )
-        },
-        accessorKey: "cognome",
-    },
-    {
-        header: ({column}) => {
-            return (
-                <button className="flex items-center gap-2 text-md cursor-pointer" onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}>
-                    Ruolo 
-                    <HugeiconsIcon icon={ArrowUpDownIcon} strokeWidth={2} className="size-4" />   
-
-                </button>
-            )
-        },
+        header: ({ column }) => (
+            <button
+                className="flex items-center gap-2 text-md cursor-pointer"
+                onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+            >
+                Ruolo
+                <HugeiconsIcon icon={ArrowUpDownIcon} strokeWidth={2} className="size-4" />
+            </button>
+        ),
         accessorKey: "ruolo",
     },
     {
@@ -204,51 +193,32 @@ export const createColumnsUtenze = (actions: UtenzeActions = {}): ColumnDef<Uten
         header: "Azioni",
         cell: ({ row }) => {
             const { onView, onEdit, onDelete } = actions;
-            const utenza = row.original;
-
+            const utente = row.original;
             return (
                 <div className="flex justify-end items-center gap-2">
                     <Button
                         variant="ghost"
                         size="sm"
-                        onClick={() => {
-                            if (onView) {
-                                onView(utenza);
-                            } else {
-                                console.log("Visualizza utenza:", utenza);
-                            }
-                        }}
+                        onClick={() => onView?.(utente)}
                     >
                         <HugeiconsIcon icon={EyeIcon} strokeWidth={2} className="size-4" />
                     </Button>
                     <Button
                         variant="ghost"
                         size="sm"
-                        onClick={() => {
-                            if (onEdit) {
-                                onEdit(utenza);
-                            } else {
-                                console.log("Modifica utenza:", utenza);
-                            }
-                        }}
+                        onClick={() => onEdit?.(utente)}
                     >
                         <HugeiconsIcon icon={EditIcon} strokeWidth={2} className="size-4" />
                     </Button>
                     <Button
                         variant="destructive"
                         size="sm"
-                        onClick={() => {
-                            if (onDelete) {
-                                onDelete(utenza);
-                            } else {
-                                console.log("Elimina utenza:", utenza);
-                            }
-                        }}
+                        onClick={() => onDelete?.(utente)}
                     >
                         <HugeiconsIcon icon={DeleteIcon} strokeWidth={2} className="size-4" />
                     </Button>
                 </div>
             );
         },
-    }
-]
+    },
+];
