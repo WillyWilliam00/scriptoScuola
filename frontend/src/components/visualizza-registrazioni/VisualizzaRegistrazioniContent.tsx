@@ -1,39 +1,27 @@
-import { useState } from "react";
 import { createColumnsRegistrazioni, type Registrazioni } from "@/components/table/columns";
 import { DataTable } from "@/components/table/DataTable";
 import { useRegistrazioniSuspense } from "@/hooks/use-registrazioni";
 import type { RegistrazioniCopieQuery } from "@shared/validation";
 
 export interface VisualizzaRegistrazioniContentProps {
+  query: RegistrazioniCopieQuery;
+  onPageChange: (page: number) => void;
+  onPageSizeChange: (pageSize: string) => void;
   onView: (registrazione: Registrazioni) => void;
   onEdit: (registrazione: Registrazioni) => void;
   onDelete: (registrazione: Registrazioni) => void;
 }
 
-const defaultQuery: RegistrazioniCopieQuery = { page: 1, pageSize: 10, sortOrder: 'desc', sortField: 'createdAt' };
-
 /** Contenuto che sospende fino al caricamento delle registrazioni; da usare dentro <Suspense>. */
 export function VisualizzaRegistrazioniContent({
+  query,
+  onPageChange,
+  onPageSizeChange,
   onView,
   onEdit,
   onDelete,
 }: VisualizzaRegistrazioniContentProps) {
-  const [registrazioniQuery, setRegistrazioniQuery] = useState<RegistrazioniCopieQuery>(defaultQuery);
-
-  const handlePageChange = (page: number) => {
-    setRegistrazioniQuery((prevQuery: RegistrazioniCopieQuery) => ({
-      ...prevQuery,
-      page,
-    }));
-  };
-  const handlePageSizeChange = (pageSize: string) => {
-    setRegistrazioniQuery((prevQuery: RegistrazioniCopieQuery) => ({
-      ...prevQuery,
-      pageSize: Number(pageSize),
-      page: 1,
-    }))
-  }
-  const { data, isFetching } = useRegistrazioniSuspense(registrazioniQuery);
+  const { data } = useRegistrazioniSuspense(query);
   const columns = createColumnsRegistrazioni({ onView, onEdit, onDelete });
   const tableData: Registrazioni[] = data.data.map((d) => ({
     id: d.id,
@@ -52,18 +40,13 @@ export function VisualizzaRegistrazioniContent({
 
   return (
     <div className="w-full mt-4">
-      {isFetching && (
-        <div className="text-muted-foreground text-sm py-1" aria-live="polite">
-          Aggiornamento dati…
-        </div>
-      )}
       <DataTable
         columns={columns}
         data={tableData}
         tableType="registrazioni"
         pagination={data.pagination}
-        onPageChange={handlePageChange}
-        onPageSizeChange={handlePageSizeChange}
+        onPageChange={onPageChange}
+        onPageSizeChange={onPageSizeChange}
       />
     </div>
   );

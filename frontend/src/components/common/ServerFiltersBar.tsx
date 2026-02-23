@@ -3,11 +3,12 @@ import { InputGroup, InputGroupAddon, InputGroupInput } from "@/components/ui/in
 import { Field, FieldGroup, FieldLabel } from "@/components/ui/field";
 import { SearchIcon } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
+import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 const DEFAULT_FILTER_DEBOUNCE_MS = 300;
 
 export interface ServerFiltersBarProps {
-  type: "docenti" | "utenze";
+  type: "docenti" | "utenze" | "registrazioni";
   filterValues: Record<string, string | undefined>;
   onFilterChange: (filters: Record<string, string | undefined>) => void;
   filterDebounceMs?: number;
@@ -23,7 +24,11 @@ export function ServerFiltersBar({
   const [localNome, setLocalNome] = useState(filterValues.nome ?? "");
   const [localCognome, setLocalCognome] = useState(filterValues.cognome ?? "");
   const [localIdentifier, setLocalIdentifier] = useState(filterValues.identifier ?? "");
-  console.log('ServerFiltersBar render');
+  const [localRuolo, setLocalRuolo] = useState(filterValues.ruolo ?? "");
+  const [localDocenteNome, setLocalDocenteNome] = useState(filterValues.docenteNome ?? "");
+  const [localDocenteCognome, setLocalDocenteCognome] = useState(filterValues.docenteCognome ?? "");
+  const [localCopieEffettuate, setLocalCopieEffettuate] = useState(filterValues.copieEffettuate ?? "");
+  const [localUtenteIdentifier, setLocalUtenteIdentifier] = useState(filterValues.utenteIdentifier ?? "");
   useEffect(() => {
     setLocalNome(filterValues.nome ?? "");
   }, [filterValues.nome]);
@@ -33,6 +38,21 @@ export function ServerFiltersBar({
   useEffect(() => {
     setLocalIdentifier(filterValues.identifier ?? "");
   }, [filterValues.identifier]);
+  useEffect(() => {
+    setLocalRuolo(filterValues.ruolo ?? "");
+  }, [filterValues.ruolo]);
+  useEffect(() => {
+    setLocalDocenteNome(filterValues.docenteNome ?? "");
+  }, [filterValues.docenteNome]);
+  useEffect(() => {
+    setLocalDocenteCognome(filterValues.docenteCognome ?? "");
+  }, [filterValues.docenteCognome]);
+  useEffect(() => {
+    setLocalCopieEffettuate(filterValues.copieEffettuate ?? "");
+  }, [filterValues.copieEffettuate]);
+  useEffect(() => {
+    setLocalUtenteIdentifier(filterValues.utenteIdentifier ?? "");
+  }, [filterValues.utenteIdentifier]);
 
   const emitFilterChange = useCallback(
     (filters: Record<string, string | undefined>) => {
@@ -65,6 +85,65 @@ export function ServerFiltersBar({
       emitFilterChange({ identifier: value.trim() || undefined });
     },
     [emitFilterChange]
+  );
+  const handleUtenzeRuoloChange = useCallback(
+    (value: string | undefined) => {
+      if (value === "all") {
+        value = undefined;
+      }
+      setLocalRuolo(value ?? "");
+      emitFilterChange({ ruolo: value || undefined });
+    },
+    [emitFilterChange]
+  );
+
+  const handleRegistrazioniDocenteNomeChange = useCallback(
+    (value: string) => {
+      setLocalDocenteNome(value);
+      emitFilterChange({
+        docenteNome: value.trim() || undefined,
+        docenteCognome: localDocenteCognome.trim() || undefined,
+        copieEffettuate: localCopieEffettuate.trim() || undefined,
+        utenteIdentifier: localUtenteIdentifier.trim() || undefined,
+      });
+    },
+    [localDocenteCognome, localCopieEffettuate, localUtenteIdentifier, emitFilterChange]
+  );
+  const handleRegistrazioniDocenteCognomeChange = useCallback(
+    (value: string) => {
+      setLocalDocenteCognome(value);
+      emitFilterChange({
+        docenteNome: localDocenteNome.trim() || undefined,
+        docenteCognome: value.trim() || undefined,
+        copieEffettuate: localCopieEffettuate.trim() || undefined,
+        utenteIdentifier: localUtenteIdentifier.trim() || undefined,
+      });
+    },
+    [localDocenteNome, localCopieEffettuate, localUtenteIdentifier, emitFilterChange]
+  );
+  const handleRegistrazioniCopieChange = useCallback(
+    (value: string) => {
+      setLocalCopieEffettuate(value);
+      emitFilterChange({
+        docenteNome: localDocenteNome.trim() || undefined,
+        docenteCognome: localDocenteCognome.trim() || undefined,
+        copieEffettuate: value.trim() || undefined,
+        utenteIdentifier: localUtenteIdentifier.trim() || undefined,
+      });
+    },
+    [localDocenteNome, localDocenteCognome, localUtenteIdentifier, emitFilterChange]
+  );
+  const handleRegistrazioniUtenteChange = useCallback(
+    (value: string) => {
+      setLocalUtenteIdentifier(value);
+      emitFilterChange({
+        docenteNome: localDocenteNome.trim() || undefined,
+        docenteCognome: localDocenteCognome.trim() || undefined,
+        copieEffettuate: localCopieEffettuate.trim() || undefined,
+        utenteIdentifier: value.trim() || undefined,
+      });
+    },
+    [localDocenteNome, localDocenteCognome, localCopieEffettuate, emitFilterChange]
   );
 
   return (
@@ -102,7 +181,8 @@ export function ServerFiltersBar({
         </FieldGroup>
       )}
       {type === "utenze" && (
-        <Field className="flex-1 min-w-[200px] max-w-xl">
+        <div className="flex flex-row gap-2 max-w-xl">
+        <Field className="">
           <FieldLabel htmlFor="search-utenti">Cerca per email o username</FieldLabel>
           <InputGroup>
             <InputGroupInput
@@ -116,6 +196,83 @@ export function ServerFiltersBar({
             </InputGroupAddon>
           </InputGroup>
         </Field>
+        <Field>
+        <FieldLabel htmlFor="ruolo-select">
+          Ruolo
+        </FieldLabel>
+        <Select defaultValue={localRuolo} onValueChange={(value) => handleUtenzeRuoloChange(value)}>
+          <SelectTrigger id="ruolo-select">
+            <SelectValue placeholder="Ruolo" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectGroup>
+              <SelectItem value="all">Tutti</SelectItem>
+              <SelectItem value="admin">Amministratore</SelectItem>
+              <SelectItem value="collaboratore">Collaboratore</SelectItem>
+            </SelectGroup>
+          </SelectContent>
+        </Select>
+      </Field>
+      </div>
+      )}
+      {type === "registrazioni" && (
+        <FieldGroup className="flex flex-row  gap-4 max-w-7xl">
+          <Field className="">
+            <FieldLabel htmlFor="reg-docente-nome">Nome docente</FieldLabel>
+            <InputGroup>
+              <InputGroupInput
+                id="reg-docente-nome"
+                value={localDocenteNome}
+                onChange={(e) => handleRegistrazioniDocenteNomeChange(e.target.value)}
+                placeholder="Nome docente…"
+              />
+              <InputGroupAddon align="inline-start">
+                <HugeiconsIcon icon={SearchIcon} strokeWidth={2} className="size-4" />
+              </InputGroupAddon>
+            </InputGroup>
+          </Field>
+          <Field className="">
+            <FieldLabel htmlFor="reg-docente-cognome">Cognome docente</FieldLabel>
+            <InputGroup>
+              <InputGroupInput
+                id="reg-docente-cognome"
+                value={localDocenteCognome}
+                onChange={(e) => handleRegistrazioniDocenteCognomeChange(e.target.value)}
+                placeholder="Cognome docente…"
+              />
+              <InputGroupAddon align="inline-start">
+                <HugeiconsIcon icon={SearchIcon} strokeWidth={2} className="size-4" />
+              </InputGroupAddon>
+            </InputGroup>
+          </Field>
+          <Field className="max-w-36">
+            <FieldLabel htmlFor="reg-copie">Copie effettuate</FieldLabel>
+            <InputGroup>
+              <InputGroupInput
+                id="reg-copie"
+                type="number"
+                min={0}
+                value={localCopieEffettuate}
+                onChange={(e) => handleRegistrazioniCopieChange(e.target.value)}
+                placeholder="Copie"
+              />
+            </InputGroup>
+          </Field>
+          <Field className="">
+            <FieldLabel htmlFor="reg-utente">Utente</FieldLabel>
+            <InputGroup>
+              <InputGroupInput
+                id="reg-utente"
+                value={localUtenteIdentifier}
+                onChange={(e) => handleRegistrazioniUtenteChange(e.target.value)}
+                placeholder="Username o email…"
+              />
+              <InputGroupAddon align="inline-start">
+                <HugeiconsIcon icon={SearchIcon} strokeWidth={2} className="size-4" />
+              </InputGroupAddon>
+            </InputGroup>
+          </Field>
+        </FieldGroup>
       )}
     </div>
   );

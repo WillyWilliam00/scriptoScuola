@@ -272,7 +272,7 @@ export const createColumnsRegistrazioni = (actions: RegistrazioniActions = {}): 
         header: ({column}) => {
             return (
                 <button className="flex items-center gap-2 text-md cursor-pointer" onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}>
-                    Docente 
+                    Nome Docente 
                     <HugeiconsIcon icon={ArrowUpDownIcon} strokeWidth={2} className="size-4" />   
                 </button>
             )
@@ -280,8 +280,22 @@ export const createColumnsRegistrazioni = (actions: RegistrazioniActions = {}): 
         accessorKey: "docenteNome",
         cell: ({ row }) => {
             const nome = row.original.docenteNome || '';
+            return nome || '-';
+        },
+    },
+    {
+        header: ({column}) => {
+            return (
+                <button className="flex items-center gap-2 text-md cursor-pointer" onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}>
+                    Cognome Docente 
+                    <HugeiconsIcon icon={ArrowUpDownIcon} strokeWidth={2} className="size-4" />   
+                </button>
+            )
+        },
+        accessorKey: "docenteCognome",
+        cell: ({ row }) => {
             const cognome = row.original.docenteCognome || '';
-            return nome && cognome ? `${nome} ${cognome}` : '-';
+            return cognome || '-';
         },
     },
     {
