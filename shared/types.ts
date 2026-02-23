@@ -88,10 +88,19 @@ export interface Registrazione {
   id: number;
   docenteId: number;
   copieEffettuate: number;
+  istitutoId: number;
   utenteId: string | null;
   note: string | null;
   createdAt: Date;
   updatedAt: Date;
+}
+
+// --- Registrazione Copie con Dettagli (con join) ---
+export interface RegistrazioneConDettagli extends Registrazione {
+  docenteNome: string | null;
+  docenteCognome: string | null;
+  utenteUsername: string | null;
+  utenteEmail: string | null;
 }
 
 // --- Tipi composti ---
@@ -119,6 +128,11 @@ export interface LoginResponse {
     username: string | null;
     ruolo: 'admin' | 'collaboratore';
   };
+  istituto: {
+    id: number;
+    nome: string;
+    codiceIstituto: string;
+  };
 }
 
 export interface RefreshTokenResponse {
@@ -129,4 +143,4 @@ export interface RefreshTokenResponse {
 
 export interface DocentiPaginatedResponse extends PaginationResponse<DocenteConRegistrazioni> {}
 export interface UtentiPaginatedResponse extends PaginationResponse<Utente> {}
-export interface RegistrazioniCopiePaginatedResponse extends PaginationResponse<Registrazione> {}
+export interface RegistrazioniCopiePaginatedResponse extends PaginationResponse<RegistrazioneConDettagli> {}
