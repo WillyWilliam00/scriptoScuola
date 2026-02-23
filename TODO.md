@@ -13,7 +13,7 @@ Lista di attività da completare per il progetto. Usa questo file come roadmap.
 
 
 
-- [ ] **Gestire ErrorBoundary localmente nelle tabelle**  
+- [x] **Gestire ErrorBoundary localmente nelle tabelle**  
   Implementare ErrorBoundary specifici per ogni tabella (DataTable) per gestire errori di caricamento dati in modo isolato, senza bloccare l'intera applicazione.
 
 ---
@@ -21,12 +21,15 @@ Lista di attività da completare per il progetto. Usa questo file come roadmap.
 ## CRUD
 
 
-- [ ] **Controllare CRUD in tabelle**  
+- [x] **Controllare CRUD in tabelle**  
   Verificare e testare tutte le operazioni CRUD nelle tabelle esistenti (docenti, utenti) per assicurarsi che funzionino correttamente e gestiscano gli errori in modo appropriato.
+  - [] *Inserire filtri di ricerca in gestione utente e registrazioni*  
+  - [] *impaginazione lato backend*  
 
 
-- [ ] **Implementare reset docenti con possibilità di cambiare i limiti**  
-  Nella funzionalità di reset docenti, aggiungere la possibilità di modificare i limiti di copie per ogni docente durante l'operazione di reset.
+
+
+
 
 - [ ] **Export Excel tabella**  
   Implementare funzionalità di esportazione in formato Excel per le tabelle (docenti, utenti, registrazioni). Permettere l'esportazione dei dati filtrati/visualizzati nella tabella corrente.
@@ -37,6 +40,8 @@ Lista di attività da completare per il progetto. Usa questo file come roadmap.
 
 - [x] **Inserire landing page**  
   Creare una pagina di benvenuto/landing page per l'applicazione con informazioni sul sistema e accesso rapido alle funzionalità principali.
+  - [] *rendere respnsive tabella + sidebar*  
+
 
 
 ---
