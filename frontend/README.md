@@ -1,6 +1,6 @@
-## CopyTrack Frontend
+## ScriptaScuola Frontend
 
-Il frontend di **CopyTrack** è una **single page application** in **React + TypeScript** che fornisce l’interfaccia per:
+Il frontend di **ScriptaScuola** è una **single page application** in **React + TypeScript** che fornisce l’interfaccia per:
 - registrare le fotocopie effettuate,
 - gestire i docenti e i relativi limiti,
 - gestire le utenze (admin/collaboratori),
@@ -12,7 +12,7 @@ Il frontend di **CopyTrack** è una **single page application** in **React + Typ
 
 - [Stack frontend](#stack-frontend)
 - [Struttura principale](#struttura-principale)
-- [Integrazione con il backend CopyTrack](#integrazione-con-il-backend-copytrack)
+- [Integrazione con il backend ScriptaScuola](#integrazione-con-il-backend-scriptascuola)
 - [Setup & avvio](#setup--avvio)
   - [Prerequisiti](#prerequisiti)
   - [Installazione dipendenze](#installazione-dipendenze)
@@ -30,7 +30,7 @@ Il frontend di **CopyTrack** è una **single page application** in **React + Typ
   - gestione asincrona dei dati (`QueryClient`),
   - validazione e gestione dei form (via Zod e adapter TanStack),
   - tabelle e viste tabellari.
-- Integrazione con le API backend di CopyTrack tramite HTTP client (es. Axios).
+- Integrazione con le API backend di ScriptaScuola tramite HTTP client (es. Axios).
 
 ### Struttura principale
 
@@ -44,30 +44,44 @@ Il frontend di **CopyTrack** è una **single page application** in **React + Typ
     - `QueryClientProvider` di TanStack Query.
     - `BrowserRouter` e le varie route principali dell’app.
   - Routing:
+    - `/` → **landing page** (`LandingPage`).
     - `/login` → pagina di login.
     - `/register` → pagina di registrazione/setup iniziale.
     - Rotte protette racchiuse in `AppLayout`:
-      - `/` → vista principale di **registrazione copie** (`RegistraCopie`).
+      - `/registra-copie` → vista registrazione copie (`RegistraCopie`).
       - `/gestione-docenti` → gestione docenti e limiti (`GestioneDocenti`).
       - `/gestione-utenze` → gestione utenze (admin/collaboratori) (`GestioneUtenze`).
+      - `/visualizza-registrazioni` → visualizzazione registrazioni copie (`VisualizzaRegistrazioni`).
+      - `/profilo` → profilo utente (`ProfiloUtente`).
       - `/dashboard-insegnanti` → redirect verso `/gestione-docenti`.
+    - Route catch-all `*` → pagina 404 (`NotFound`).
 
 - Componenti principali (indicativi):
   - `components/AppLayout.tsx`: layout principale con navigazione, header, ecc.
+  - `components/LandingPage.tsx`, `components/landing/*`: landing page con Hero, Features, FAQ, CTA.
   - `components/RegistraCopie.tsx`: form e flusso per registrare nuove fotocopie (selezione docente, numero copie, note, ecc.).
-  - `components/GestioneDocenti.tsx`: lista docenti, creazione/aggiornamento/eliminazione, limiti copie.
-  - `components/GestioneUtenze.tsx`: lista utenti, creazione collaboratori, update/eliminazione.
+  - `components/GestioneDocenti.tsx`: lista docenti con modali (NuovoDocenteModal, EditDocenteModal, ViewDocenteModal) e dialoghi (EliminaDocenteDialog, EliminaTuttiDocentiDialog, ResetConteggioDialog).
+  - `components/ImportDocentiDialog.tsx`: dialog per importare docenti da file Excel con anteprima dei dati.
+  - `components/GestioneUtenze.tsx`: lista utenti con modali (NuovoUtenteModal, EditUtenteModal, ViewUtenteModal) e dialoghi (EliminaUtenteDialog, DeleteUtenteAlertDialog).
+  - `components/VisualizzaRegistrazioni.tsx`: visualizzazione registrazioni copie con tabella e filtri.
+  - `components/ProfiloUtente.tsx`: profilo utente autenticato.
+  - `components/NotFound.tsx`: pagina 404 per route non trovate.
   - `components/Login.tsx` e `components/Register.tsx`: flussi di autenticazione e setup istituto.
 
 > Nota: i nomi esatti e la struttura interna dei componenti possono evolvere, ma l’idea principale è mantenere una separazione chiara tra aree funzionali (copie, docenti, utenze, auth).
 
-### Integrazione con il backend CopyTrack
+### Integrazione con il backend ScriptaScuola
 
 - Il frontend comunica con le API esposte dal backend:
   - `/api/auth` per login, setup scuola, refresh token, logout.
-  - `/api/docenti` per elenco/gestione docenti.
+  - `/api/docenti` per elenco/gestione docenti, importazione bulk da Excel, eliminazione multipla.
   - `/api/utenti` per elenco/gestione utenti (admin).
-  - `/api/registrazioni-copie` per creare/listare/eliminare registrazioni di copie.
+  - `/api/registrazioni-copie` per creare/listare/eliminare registrazioni di copie, eliminazione multipla.
+  - `/api/istituti` per gestione istituto (es. eliminazione).
+- Funzionalità aggiuntive implementate:
+  - Importazione bulk docenti da Excel (`POST /api/docenti/bulk-import`) con anteprima dati.
+  - Eliminazione di tutti i docenti (`DELETE /api/docenti/delete-all`).
+  - Eliminazione di tutte le registrazioni copie (`DELETE /api/registrazioni-copie/delete-all`).
 - Le chiamate HTTP possono essere implementate con **Axios** o `fetch`, idealmente incapsulate in servizi dedicati (es. `api/docenti`, `api/utenti`, ecc.).
 - TanStack Query si occupa di:
   - caching delle risposte,
@@ -79,7 +93,7 @@ Il frontend di **CopyTrack** è una **single page application** in **React + Typ
 #### Prerequisiti
 
 - Node.js (versione LTS recente)
-- Backend di CopyTrack in esecuzione (vedi `backend/README.md`)
+- Backend di ScriptaScuola in esecuzione (vedi `backend/README.md`)
 
 #### Installazione dipendenze
 
