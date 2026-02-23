@@ -212,6 +212,10 @@ export const registrazioniCopieQuerySchema = z.object({
   pageSize: z.coerce.number().int().positive().max(100).catch(20).default(20),
   docenteId: z.number().optional(),
   utenteId: z.uuid().optional(),
+  docenteNome: z.string().optional(),
+  docenteCognome: z.string().optional(),
+  copieEffettuate: z.coerce.number().int().nonnegative().optional(),
+  utenteIdentifier: z.string().optional(),
   sortField: z.enum(['docenteId', 'utenteId', 'createdAt', 'updatedAt']).optional(),
   sortOrder: z.enum(['asc', 'desc']).optional().default('asc'),
 })
