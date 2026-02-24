@@ -30,11 +30,11 @@ export interface UtentiFilters {
   ruolo?: 'admin' | 'collaboratore';
 }
 export interface UtentiSort {
-  field: 'email' | 'username' | 'ruolo';
+  field: 'ruolo' | 'identificativo';
   order: SortOrder;
 }
 export interface RegistrazioniCopieSort {
-  field: 'docenteId' | 'utenteId' | 'createdAt' | 'updatedAt';
+  field: 'docenteId' | 'utenteId' | 'createdAt' | 'updatedAt' | 'docenteNome' | 'docenteCognome' | 'copieEffettuate' | 'utente';
   order: SortOrder;
 }
 export interface RegistrazioniCopieFilters {

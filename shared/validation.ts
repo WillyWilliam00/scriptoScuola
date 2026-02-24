@@ -204,7 +204,17 @@ export const docentiQuerySchema = z.object({
   pageSize: z.coerce.number().int().positive().max(100).catch(20).default(20),
   nome: z.string().optional(),
   cognome: z.string().optional(),
-  sortField: z.enum(['nome', 'cognome', 'limiteCopie', 'copieEffettuate', 'copieRimanenti', 'createdAt', 'updatedAt']).optional(),
+  sortField: z
+    .enum([
+      'nome',
+      'cognome',
+      'limiteCopie',
+      'copieEffettuate',
+      'copieRimanenti',
+      'createdAt',
+      'updatedAt',
+    ])
+    .default('createdAt'),
   sortOrder: z.enum(['asc', 'desc']).optional().default('asc'),
 });
 export const registrazioniCopieQuerySchema = z.object({
@@ -216,7 +226,7 @@ export const registrazioniCopieQuerySchema = z.object({
   docenteCognome: z.string().optional(),
   copieEffettuate: z.coerce.number().int().nonnegative().optional(),
   utenteIdentifier: z.string().optional(),
-  sortField: z.enum(['docenteId', 'utenteId', 'createdAt', 'updatedAt']).optional(),
+  sortField: z.enum(['docenteId', 'utenteId', 'createdAt', 'updatedAt', 'docenteNome', 'docenteCognome', 'copieEffettuate', 'utente']).default('createdAt'),
   sortOrder: z.enum(['asc', 'desc']).optional().default('asc'),
 })
 export const utentiQuerySchema = z.object({
@@ -224,7 +234,7 @@ export const utentiQuerySchema = z.object({
   pageSize: z.coerce.number().int().positive().max(100).catch(20).default(20),
   identifier: z.string().min(1, 'Inserisci email o username').optional(),
   ruolo: z.enum(['admin', 'collaboratore']).optional(),
-  sortField: z.enum(['username', 'email', 'ruolo']).optional(),
+  sortField: z.enum(['ruolo', 'identificativo']).default('ruolo'),
   sortOrder: z.enum(['asc', 'desc']).optional().default('asc'),
   
 })
