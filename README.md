@@ -1,6 +1,6 @@
-## CopyTrack
+## ScriptaScuola
 
-CopyTrack è un gestionale web pensato per **scuole e istituti scolastici** che vogliono digitalizzare e monitorare le **fotocopie effettuate da docenti e personale**, con:
+ScriptaScuola è un gestionale web pensato per **scuole e istituti scolastici** che vogliono digitalizzare e monitorare le **fotocopie effettuate da docenti e personale**, con:
 - gestione dei **limiti di copie per docente**,
 - tracciamento delle **registrazioni di copie** per utente,
 - gestione di **utenti e ruoli** (admin, collaboratore),
@@ -26,17 +26,18 @@ Il progetto è strutturato come **monorepo** con tre workspace:
 
 ```mermaid
 flowchart LR
-  user["Utente (Admin/Collaboratore)"] --> frontend["Frontend React (CopyTrack)"]
+  user["Utente (Admin/Collaboratore)"] --> frontend["Frontend React (ScriptaScuola)"]
   frontend --> backend["Backend Express/TypeScript"]
   backend --> db["PostgreSQL (Neon) + Drizzle ORM"]
 ```
 
-- **Frontend (CopyTrack UI)**: login/registrazione istituto, registrazione fotocopie, gestione docenti, gestione utenze.
-- **Backend (CopyTrack API)**:
+- **Frontend (ScriptaScuola UI)**: landing page, login/registrazione istituto, registrazione fotocopie, gestione docenti, gestione utenze, visualizzazione registrazioni, profilo utente.
+- **Backend (ScriptaScuola API)**:
   - autenticazione (`/api/auth`) con JWT e refresh token (con rotazione),
   - gestione docenti (`/api/docenti`),
   - gestione utenti (`/api/utenti`),
   - registrazioni di copie (`/api/registrazioni-copie`),
+  - gestione istituti (`/api/istituti`),
   - supporto multi‑tenant per istituto (`tenantStore`).
 
 ### Stack tecnologico
@@ -95,7 +96,7 @@ npm run dev
 
 ### Documentazione dettagliata
 
-- [`backend/README.md`](backend/README.md): documentazione delle API CopyTrack (autenticazione, docenti, utenti, registrazioni copie), modello dati e setup backend.
-- [`frontend/README.md`](frontend/README.md): documentazione dell’interfaccia CopyTrack, struttura delle pagine e integrazione con le API.
+- [`backend/README.md`](backend/README.md): documentazione delle API ScriptaScuola (autenticazione, docenti, utenti, registrazioni copie), modello dati e setup backend.
+- [`frontend/README.md`](frontend/README.md): documentazione dell’interfaccia ScriptaScuola, struttura delle pagine e integrazione con le API.
 
 

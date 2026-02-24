@@ -1,5 +1,5 @@
 import { Navigate, useLocation } from "react-router-dom";
-import { useAuthStore } from "../store/auth-store.js";
+import { useAuthStore } from "@/store/auth-store";
 
 /**
  * Componente per gestire redirect se già autenticato su route pubbliche
@@ -15,7 +15,7 @@ export default function PublicRoute({ children }: { children: React.ReactNode })
 
   // Se già autenticato e su login/register, redirect a home
   if (isAuthenticated && (location.pathname === '/login' || location.pathname === '/register')) {
-    return <Navigate to="/" replace />;
+    return <Navigate to="/registra-copie" replace />;
   }
 
   return <>{children}</>;

@@ -90,6 +90,21 @@ export function requireRole(...roles: Array<'admin' | 'collaboratore'>) {
     }
 }
 
+/** Codici errore Node/Postgres per connessione DB non disponibile */
+const DB_UNAVAILABLE_CODES = ['ECONNREFUSED', 'ETIMEDOUT', 'ENOTFOUND', 'ECONNRESET', 'ENETUNREACH'];
+
+/** Messaggio generico quando il servizio (es. database) non è raggiungibile. Non esponiamo query o dettagli tecnici. */
+const SERVICE_UNAVAILABLE_MESSAGE = 'Servizio temporaneamente non disponibile. Riprova tra qualche minuto.';
+
+function isDatabaseUnavailableError(err: unknown): boolean {
+    if (!err || typeof err !== 'object') return false;
+    const e = err as { code?: string; message?: string; cause?: unknown };
+    if (typeof e.code === 'string' && DB_UNAVAILABLE_CODES.includes(e.code)) return true;
+    if (typeof e.message === 'string' && e.message.includes('Failed query')) return true;
+    if (e.cause && isDatabaseUnavailableError(e.cause)) return true;
+    return false;
+}
+
 export function errorHandler(err: ErrorWithStatus, req: Request, res: Response, next: NextFunction) {
     console.error(err);
     if(err instanceof ZodError) {
@@ -97,6 +112,10 @@ export function errorHandler(err: ErrorWithStatus, req: Request, res: Response, 
             error: 'Dati di input non validi',
             details: err.issues
         })
+    }
+    // Database non raggiungibile: risposta generica 503 senza dettagli (query, host, ecc.)
+    if (isDatabaseUnavailableError(err)) {
+        return res.status(503).json({ error: SERVICE_UNAVAILABLE_MESSAGE });
     }
     const statusCode = err.status || 500;
     const message = err.message || 'Qualcosa è andato storto!';

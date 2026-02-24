@@ -49,16 +49,16 @@ export const createUtenteSchema = z.discriminatedUnion('ruolo', [
 export const modifyUtenteSchema = z.discriminatedUnion('ruolo', [
   z.object({
     ruolo: z.literal('admin'),
-    email: z.email('Formato email non valido').optional(),
-    password: z.string().min(8, 'La password deve essere di almeno 8 caratteri').optional(),
-  }).strict(),
+    email: z.email('Formato email non valido'),
+    password: z.string().min(8, 'La password deve essere di almeno 8 caratteri').or(z.literal('')).optional(),
+  }),
   z.object({
     ruolo: z.literal('collaboratore'),
     username: z.string()
       .min(3, 'Il username deve essere lungo almeno 3 caratteri')
-      .refine((val) => !val.includes('@'), { message: 'Il username non può contenere @' }).optional(),
-    password: z.string().min(8, 'La password deve essere di almeno 8 caratteri').optional(),
-  }).strict(),
+      .refine((val) => !val.includes('@'), { message: 'Il username non può contenere @' }),
+    password: z.string().min(8, 'La password deve essere di almeno 8 caratteri').or(z.literal('')).optional(),
+  })
 ]);
 
 // --- Login (un campo identificativo: email o username) ---
@@ -85,6 +85,11 @@ export const insertRegistrazioneSchema = z.object({
   utenteId: z.uuid(),
   note: z.string().optional(),
 });
+
+export const modifyRegistrazioneSchema = z.object({
+  copieEffettuate: z.number().positive('Le copie devono essere almeno 1'),
+  note: z.string().optional(),
+}).strict();
 
 /**
  * Schema per il form di registrazione copie (solo i campi inseriti dall'utente)
@@ -126,6 +131,24 @@ export const createRegistrazioneFormSchema = (limiteCopie: number, copieRimanent
     note: z.string(), // Sempre stringa nel form (può essere vuota)
   });
 };
+
+/**
+ * Schema per il form di modifica registrazione copie
+ * Usato con TanStack Form nel componente frontend per modificare una registrazione esistente
+ * I valori sono stringhe nel form, quindi validiamo come stringhe e convertiamo dopo
+ */
+export const modifyRegistrazioneFormSchema = z.object({
+  copieEffettuate: z.string()
+    .min(1, 'Inserisci un numero di copie')
+    .refine(
+      (val) => {
+        const num = Number(val);
+        return !Number.isNaN(num) && Number.isInteger(num) && num > 0;
+      },
+      { message: 'Le copie devono essere un numero intero positivo' }
+    ),
+  note: z.string(), // Sempre stringa nel form (può essere vuota)
+});
 
 /**
  * Schema per il form di inserimento docente (solo i campi inseriti dall'utente)
@@ -181,7 +204,17 @@ export const docentiQuerySchema = z.object({
   pageSize: z.coerce.number().int().positive().max(100).catch(20).default(20),
   nome: z.string().optional(),
   cognome: z.string().optional(),
-  sortField: z.enum(['nome', 'cognome', 'limiteCopie', 'copieEffettuate', 'copieRimanenti', 'createdAt', 'updatedAt']).optional(),
+  sortField: z
+    .enum([
+      'nome',
+      'cognome',
+      'limiteCopie',
+      'copieEffettuate',
+      'copieRimanenti',
+      'createdAt',
+      'updatedAt',
+    ])
+    .default('createdAt'),
   sortOrder: z.enum(['asc', 'desc']).optional().default('asc'),
 });
 export const registrazioniCopieQuerySchema = z.object({
@@ -189,7 +222,11 @@ export const registrazioniCopieQuerySchema = z.object({
   pageSize: z.coerce.number().int().positive().max(100).catch(20).default(20),
   docenteId: z.number().optional(),
   utenteId: z.uuid().optional(),
-  sortField: z.enum(['docenteId', 'utenteId', 'createdAt', 'updatedAt']).optional(),
+  docenteNome: z.string().optional(),
+  docenteCognome: z.string().optional(),
+  copieEffettuate: z.coerce.number().int().nonnegative().optional(),
+  utenteIdentifier: z.string().optional(),
+  sortField: z.enum(['docenteId', 'utenteId', 'createdAt', 'updatedAt', 'docenteNome', 'docenteCognome', 'copieEffettuate', 'utente']).default('createdAt'),
   sortOrder: z.enum(['asc', 'desc']).optional().default('asc'),
 })
 export const utentiQuerySchema = z.object({
@@ -197,7 +234,7 @@ export const utentiQuerySchema = z.object({
   pageSize: z.coerce.number().int().positive().max(100).catch(20).default(20),
   identifier: z.string().min(1, 'Inserisci email o username').optional(),
   ruolo: z.enum(['admin', 'collaboratore']).optional(),
-  sortField: z.enum(['username', 'email', 'ruolo']).optional(),
+  sortField: z.enum(['ruolo', 'identificativo']).default('ruolo'),
   sortOrder: z.enum(['asc', 'desc']).optional().default('asc'),
   
 })
@@ -229,6 +266,7 @@ export type ModifyUtente = z.infer<typeof modifyUtenteSchema>
 export type ModifyDocente = z.infer<typeof modifyDocenteSchema>;
 export type LoginData = z.infer<typeof loginSchema>;
 export type InsertRegistrazione = z.infer<typeof insertRegistrazioneSchema>;
+export type ModifyRegistrazione = z.infer<typeof modifyRegistrazioneSchema>;
 export type DocentiQuery = z.infer<typeof docentiQuerySchema>;
 export type RegistrazioniCopieQuery = z.infer<typeof registrazioniCopieQuerySchema>;
 export type UtentiQuery = z.infer<typeof utentiQuerySchema>;

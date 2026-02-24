@@ -200,35 +200,35 @@ describe('utentiQuerySchema', () => {
     expect(result.pageSize).toBe(10);
   });
   it('accetta sortField e sortOrder validi', () => {
-    const result = utentiQuerySchema.parse({ sortField: 'username', sortOrder: 'desc' });
-    expect(result.sortField).toBe('username');
+    const result = utentiQuerySchema.parse({ sortField: 'identificativo', sortOrder: 'desc' });
+    expect(result.sortField).toBe('identificativo');
     expect(result.sortOrder).toBe('desc');
   })
   it('rifiuta sortField non valido', () => {
-    const input = { sortField: 'usernameo', sortOrder: 'desc' };
+    const input = { sortField: 'username', sortOrder: 'desc' };
     expect(() => utentiQuerySchema.parse(input)).toThrow(ZodError);
   })
   it('rifiuta sortOrder non valido', () => {
-    const input = { sortField: 'username', sortOrder: 'desco' };
+    const input = { sortField: 'identificativo', sortOrder: 'desco' };
     expect(() => utentiQuerySchema.parse(input)).toThrow(ZodError);
   })
   it('corregge page minore di 1 usando catch', () => {
-    const input = { page: 0, pageSize: 10, sortField: 'username', sortOrder: 'desc' };
+    const input = { page: 0, pageSize: 10, sortField: 'ruolo', sortOrder: 'desc' };
     const result = utentiQuerySchema.parse(input);
     expect(result.page).toBe(1); // viene corretto a 1 invece di lanciare errore
   })
   it('corregge pageSize minore di 1 usando catch', () => {
-    const input = { page: 1, pageSize: 0, sortField: 'username', sortOrder: 'desc' };
+    const input = { page: 1, pageSize: 0, sortField: 'ruolo', sortOrder: 'desc' };
     const result = utentiQuerySchema.parse(input);
     expect(result.pageSize).toBe(20); // viene corretto a 20 invece di lanciare errore
   })
   it('corregge pageSize maggiore di 100 usando catch', () => {
-    const input = { page: 1, pageSize: 101, sortField: 'username', sortOrder: 'desc' };
+    const input = { page: 1, pageSize: 101, sortField: 'ruolo', sortOrder: 'desc' };
     const result = utentiQuerySchema.parse(input);
     expect(result.pageSize).toBe(20); // viene corretto a 20 invece di lanciare errore
   })
   it('rifiuta identifier vuoto', () => {
-    const input = { identifier: '', sortField: 'username', sortOrder: 'desc' };
+    const input = { identifier: '', sortField: 'ruolo', sortOrder: 'desc' };
     expect(() => utentiQuerySchema.parse(input)).toThrow(ZodError);
   })
   it('accetta filtro ruolo admin', () => {

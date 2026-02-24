@@ -1,6 +1,6 @@
-## CopyTrack Backend
+## ScriptaScuola Backend
 
-Il backend di **CopyTrack** espone una serie di **API REST** multi‑tenant per la gestione di:
+Il backend di **ScriptaScuola** espone una serie di **API REST** multi‑tenant per la gestione di:
 - autenticazione e setup iniziale della scuola,
 - docenti e relativi limiti di copie,
 - utenti dell’istituto (admin, collaboratori),
@@ -17,6 +17,7 @@ Il backend di **CopyTrack** espone una serie di **API REST** multi‑tenant per 
   - [Docenti – `/api/docenti`](#docenti--apidocenti)
   - [Utenti – `/api/utenti`](#utenti--apiutenti)
   - [Registrazioni copie – `/api/registrazioni-copie`](#registrazioni-copie--apiregistrazioni-copie)
+  - [Istituti – `/api/istituti`](#istituti--apiistituti)
 - [Modello dati (alto livello)](#modello-dati-alto-livello)
 - [Setup & avvio](#setup--avvio)
   - [Variabili d’ambiente](#variabili-dambiente)
@@ -45,6 +46,7 @@ Il backend di **CopyTrack** espone una serie di **API REST** multi‑tenant per 
     - `/api/docenti` (protette, admin/collaboratori).
     - `/api/utenti` (protette, solo admin).
     - `/api/registrazioni-copie` (protette, admin/collaboratori).
+    - `/api/istituti` (protette, solo admin).
   - Applica i middleware `authMiddleware`, `tenantStoreMiddleware`, `requireRole` e `errorHandler`.
 - `src/route/*.ts`: singole route (authentication, docenti, utenti, registrazioni copie).
 - `src/db/tenantStore.ts`: contiene la logica di accesso ai dati per un singolo istituto (`istitutoId`), con metodi per docenti, utenti, registrazioni copie, ecc.
@@ -103,6 +105,15 @@ Protette da `authMiddleware` + `tenantStoreMiddleware` (accesso per istituto).
   - Elimina un docente dell’istituto corrente.
   - Risposta con `id` del docente eliminato.
 
+- `POST /api/docenti/bulk-import` (solo admin)
+  - Importa multipli docenti da un file Excel in un'unica operazione.
+  - Body validato con `bulkImportDocentiSchema` (array di docenti con `nome`, `cognome`, `limiteCopie` opzionale, `copieEffettuate` opzionale).
+  - Risposta con messaggio di riepilogo: totale creati, totale con copie già effettuate.
+
+- `DELETE /api/docenti/delete-all` (solo admin)
+  - Elimina tutti i docenti dell'istituto corrente.
+  - Risposta con messaggio e conteggio dei docenti eliminati.
+
 #### Utenti – `/api/utenti`
 
 Protette da `authMiddleware` + `tenantStoreMiddleware` + `requireRole('admin')`.
@@ -149,11 +160,23 @@ Protette da `authMiddleware` + `tenantStoreMiddleware`.
   - Risposta: `{ id }` della registrazione cancellata.
   - `id` validato con `idParamSchema`.
 
+- `DELETE /api/registrazioni-copie/delete-all` (solo admin)
+  - Elimina tutte le registrazioni di copie dell'istituto corrente.
+  - Risposta con messaggio di conferma.
+
+#### Istituti – `/api/istituti`
+
+Protette da `authMiddleware` + `tenantStoreMiddleware` + `requireRole('admin')`.
+
+- `DELETE /api/istituti/delete-istituto`
+  - Elimina l’istituto dell’utente autenticato (istitutoId dal token, via tenantStore).
+  - Risposta con conferma dell’eliminazione.
+
 ### Modello dati (alto livello)
 
 In `tenantStore` e nello schema Drizzle troverai entità come:
 
-- `istituti`: scuole/istituti configurati in CopyTrack.
+- `istituti`: scuole/istituti configurati in ScriptaScuola.
 - `utenti`: utenti dell’istituto (`admin`, `collaboratore`), con password hashata e ruolo.
 - `docenti`: docenti associati a un istituto, con `limiteCopie` e contatori.
 - `registrazioniCopie`: singole registrazioni di copie effettuate, legate a docente, utente e istituto.
