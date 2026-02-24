@@ -1,15 +1,15 @@
 import { lazy, Suspense, useRef } from "react";
 import AppLayout from "@/components/layout/AppLayout";
-import { BrowserRouter, Route, Routes, Navigate } from "react-router-dom";
+import { BrowserRouter, Route, Routes } from "react-router-dom";
 import ProtectedRoute from "./components/auth/ProtectedRoute";
 import PublicRoute from "./components/auth/PublicRoute";
 import ErrorBoundary from "./components/common/ErrorBoundary";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useAuthStore } from "./store/auth-store.js";
+import Login from "./components/auth/Login.js";
+import LandingPage from "./components/landing/LandingPage.js";
 
 // Code splitting: le pagine vengono caricate solo quando servono
-const LandingPage = lazy(() => import("./components/landing/LandingPage"));
-const Login = lazy(() => import("./components/auth/Login"));
 const Register = lazy(() => import("./components/auth/Register"));
 const RegistraCopie = lazy(() => import("./components/RegistraCopie"));
 const GestioneDocenti = lazy(() => import("./components/gestione-docenti/GestioneDocenti"));
