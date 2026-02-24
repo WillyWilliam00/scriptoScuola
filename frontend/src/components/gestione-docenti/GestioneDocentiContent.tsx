@@ -11,6 +11,7 @@ export function GestioneDocentiContent({
   onDelete,
   onPageChange,
   onPageSizeChange,
+  onSortChange,
 }: {
   query: DocentiQuery;
   onView: (docente: Docenti) => void;
@@ -18,9 +19,17 @@ export function GestioneDocentiContent({
   onDelete: (docente: Docenti) => void;
   onPageChange: (page: number) => void;
   onPageSizeChange: (pageSize: string) => void;
+  onSortChange: (sortField: DocentiQuery['sortField'], sortOrder: 'asc' | 'desc') => void;
 }) {
   const { data } = useDocentiSuspense(query);
-  const columns = createColumnsDocenti({ onView, onEdit, onDelete });
+  const columns = createColumnsDocenti(
+    { onView, onEdit, onDelete },
+    {
+      sortField: query.sortField,
+      sortOrder: query.sortOrder,
+      onSortChange,
+    }
+  );
   const tableData: Docenti[] = data.data.map((d) => ({
     id: d.id,
     nome: d.nome,

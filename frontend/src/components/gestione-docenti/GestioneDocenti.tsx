@@ -55,6 +55,18 @@ export default function GestioneDocenti() {
     }));
   }, []);
 
+  const handleSortChange = useCallback(
+    (sortField: DocentiQuery['sortField'], sortOrder: 'asc' | 'desc') => {
+      setDocentiQuery((prev: DocentiQuery) => ({
+        ...prev,
+        sortField,
+        sortOrder,
+        page: 1,
+      }));
+    },
+    []
+  );
+
   const handleCloseForm = useCallback(() => {
     setSelectedDocente(null);
     setTypeForm(null);
@@ -125,6 +137,7 @@ export default function GestioneDocenti() {
             onDelete={(docente) => handleOpenForm("delete", docente)}
             onPageChange={handlePageChange}
             onPageSizeChange={handlePageSizeChange}
+            onSortChange={handleSortChange}
           />
         </Suspense>
         </ErrorBoundary>
