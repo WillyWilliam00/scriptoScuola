@@ -7,7 +7,7 @@ export default function Feedback() {
     <div>
       <HeaderSection title="Feedback" icon={FileIcon} />
 
-      <div className="w-full mt-10 p-4">
+      <div className="container mx-auto max-w-4xl mt-10 p-4">
         <p className="text-muted-foreground mb-4">
           Lasciaci il tuo feedback per migliorare l&apos;applicazione.
         </p>

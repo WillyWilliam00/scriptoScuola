@@ -23,8 +23,8 @@ Lista di attività da completare per il progetto. Usa questo file come roadmap.
 
 - [x] **Controllare CRUD in tabelle**  
   Verificare e testare tutte le operazioni CRUD nelle tabelle esistenti (docenti, utenti) per assicurarsi che funzionino correttamente e gestiscano gli errori in modo appropriato.
-  - [] *Inserire filtri di ricerca in gestione utente e registrazioni*  
-  - [] *impaginazione lato backend*  
+  - [x] *Inserire filtri di ricerca in gestione utente e registrazioni*  
+  - [x] *impaginazione lato backend*  
 
 
 
@@ -40,7 +40,7 @@ Lista di attività da completare per il progetto. Usa questo file come roadmap.
 
 - [x] **Inserire landing page**  
   Creare una pagina di benvenuto/landing page per l'applicazione con informazioni sul sistema e accesso rapido alle funzionalità principali.
-  - [] *rendere respnsive tabella + sidebar*  
+  - [x] *rendere respnsive tabella + sidebar*  
 
 
 
