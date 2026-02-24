@@ -12,6 +12,7 @@ export interface GestioneUtenzeContentProps {
   onView: (utente: Utente) => void;
   onEdit: (utente: Utente) => void;
   onDelete: (utente: Utente) => void;
+  onSortChange: (sortField: UtentiQuery['sortField'], sortOrder: 'asc' | 'desc') => void;
 }
 
 /** Contenuto che sospende fino al caricamento utenti; da usare dentro <Suspense>. */
@@ -22,12 +23,20 @@ export function GestioneUtenzeContent({
   onEdit,
   onDelete,
   onPageSizeChange,
+  onSortChange,
 }: GestioneUtenzeContentProps) {
   const { data } = useUtenti(query);
-  const columns = createColumnsUtenze({ onView, onEdit, onDelete });
+  const columns = createColumnsUtenze(
+    { onView, onEdit, onDelete },
+    {
+      sortField: query.sortField,
+      sortOrder: query.sortOrder,
+      onSortChange,
+    }
+  );
 
   return (
-    <div className="w-full mt-4 relative">
+    <div className="w-full  relative">
      
       <DataTable<Utente, unknown>
         columns={columns}

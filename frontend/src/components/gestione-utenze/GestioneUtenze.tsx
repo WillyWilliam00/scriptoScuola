@@ -28,6 +28,7 @@ export default function GestioneUtenze() {
     page: 1,
     pageSize: 10,
     sortOrder: "asc",
+    sortField: "ruolo",
   };
   const [utentiQuery, setUtentiQuery] = useState<UtentiQuery>(defaultQuery);
   const [selectedUtente, setSelectedUtente] = useState<Utente | null>(null);
@@ -52,6 +53,18 @@ export default function GestioneUtenze() {
     setUtentiQuery((prev: UtentiQuery) => ({ ...prev, pageSize: Number(pageSize), page: 1 }));
   }, []);
 
+  const handleSortChange = useCallback(
+    (sortField: UtentiQuery['sortField'], sortOrder: 'asc' | 'desc') => {
+      setUtentiQuery((prev: UtentiQuery) => ({
+        ...prev,
+        sortField,
+        sortOrder,
+        page: 1,
+      }));
+    },
+    []
+  );
+
   const handleCloseForm = useCallback(() => {
     setSelectedUtente(null);
     setTypeForm(null);
@@ -74,7 +87,7 @@ export default function GestioneUtenze() {
     <div>
       <HeaderSection title="Gestione Utenze" icon={KeyIcon} />
 
-      <div className="w-full mt-10 p-4">
+      <div className="w-full  xl:mt-10 p-2 lg:p-4">
         <div className="flex flex-row gap-2 w-full justify-between items-end">
           <ServerFiltersBar
             type="utenze"
@@ -104,6 +117,7 @@ export default function GestioneUtenze() {
             query={utentiQuery}
             onPageChange={handlePageChange}
             onPageSizeChange={handlePageSizeChange}
+            onSortChange={handleSortChange}
             onView={(utente) => {
               handleOpenForm("view", utente);
             }}
