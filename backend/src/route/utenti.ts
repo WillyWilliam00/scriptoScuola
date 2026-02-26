@@ -100,7 +100,6 @@ router.put('/update-utente/:id', asyncHandler(async (req: Request, res: Response
     const { id } = uuidParamSchema.parse(req.params);
 
     const data = modifyUtenteSchema.parse(req.body);
-    console.log({ data });
     const utenteAggiornato = await req.tenantStore.utenti.update(id, data as ModifyUtente);
     
     res.status(200).json({
