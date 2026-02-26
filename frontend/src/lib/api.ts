@@ -13,15 +13,7 @@ import type { RefreshTokenResponse } from '../../../shared/types.js';
  * - Response interceptor: intercetta errori 401 e gestisce refresh token automaticamente
  */
 
-/**
- * Determina automaticamente il BASE_URL del backend in base all'hostname corrente
- * 
- * Spiegazione:
- * - Se accedi da localhost (es. http://localhost:3000), usa localhost per il backend
- * - Se accedi da IP di rete (es. http://192.168.1.53:3000), usa lo stesso IP per il backend
- * - Questo permette di accedere all'app dal telefono senza configurazioni aggiuntive
- * - Può essere sovrascritto con la variabile d'ambiente VITE_API_BASE_URL
- */
+
 function getBaseUrl(): string {
   // Se è specificata una variabile d'ambiente, usala (ha priorità)
   if (import.meta.env.VITE_API_BASE_URL) {

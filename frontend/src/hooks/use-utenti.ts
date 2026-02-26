@@ -2,6 +2,8 @@ import { useSuspenseQuery, useMutation, useQueryClient } from '@tanstack/react-q
 import { api } from '../lib/api.js';
 import type { UtentiPaginatedResponse, Utente } from '../../../shared/types.js';
 import type { UtentiQuery, CreateUtente, ModifyUtente } from '../../../shared/validation.js';
+import { toast } from 'sonner';
+import { formatError } from '@/lib/utils.js';
 
 /**
  * Hook per gestire gli utenti con TanStack Query
@@ -62,6 +64,10 @@ export function useCreateUtente() {
     onSuccess: () => {
       // Invalida la cache degli utenti per forzare il refetch
       queryClient.invalidateQueries({ queryKey: ['utenti'] });
+      toast.success("Utente creato con successo");
+    },
+    onError: (err) => {
+      toast.error(formatError(err, "Errore durante la creazione dell'utente."));
     },
   });
 }
@@ -86,6 +92,10 @@ export function useUpdateUtente() {
     onSuccess: () => {
       // Invalida la cache degli utenti per forzare il refetch
       queryClient.invalidateQueries({ queryKey: ['utenti'] });
+      toast.success("Utente aggiornato con successo");
+    },
+    onError: (err) => {
+      toast.error(formatError(err, "Errore durante l'aggiornamento dell'utente."));
     },
   });
 }
@@ -111,6 +121,10 @@ export function useDeleteUtente(onShowDialog?: () => void) {
       // Invalida la cache degli utenti per forzare il refetch
       queryClient.invalidateQueries({ queryKey: ['utenti'] });
       onShowDialog?.();
+      toast.success("Utente eliminato con successo");
+    },
+    onError: (err) => {
+      toast.error(formatError(err, "Errore durante l'eliminazione dell'utente."));  
     },
   });
 }

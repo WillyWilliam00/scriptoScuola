@@ -8,11 +8,45 @@ import docentiRoutes from './route/docenti.js';
 import utentiRoutes from './route/utenti.js';
 import registrazioniCopieRoutes from './route/registrazioniCopie.js';
 import istitutiRoutes from './route/istituti.js';
+import helmet from 'helmet';
 const app = express();
 // Porta del backend: default 3001 per evitare conflitto con frontend Vite su 3000
 const PORT = process.env.PORT || 3001;
+const origin = process.env.FRONTEND_ORIGIN || 'http://localhost:3000';
 
-app.use(cors());
+const allowedOrigins = [
+    origin,
+    'http://localhost:3000',
+    'http://192.168.1.50:3000',
+
+];
+
+app.use(
+    helmet({
+        contentSecurityPolicy: false,
+        crossOriginEmbedderPolicy: false,
+        crossOriginResourcePolicy: false, 
+        referrerPolicy: {
+            policy: 'strict-origin-when-cross-origin',
+        },
+        hsts: {
+            maxAge: 31536000,
+            includeSubDomains: true,
+            preload: true,
+        }
+    })
+)
+
+app.use(cors({
+    origin: (origin, callback) => {
+        if(!origin || allowedOrigins.includes(origin)) return callback(null, true);
+        const msg = 'The CORS policy for this site does not allow access from the specified Origin.';
+        return callback(new Error(msg), false);
+    },
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
+})) 
 app.use(express.json());
 
 // Rotte pubbliche (autenticazione)
