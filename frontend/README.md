@@ -81,11 +81,20 @@ Il frontend di **ScriptaScuola** è una **single page application** in **React +
   - Importazione bulk docenti da Excel (`POST /api/docenti/bulk-import`) con anteprima dati.
   - Eliminazione di tutti i docenti (`DELETE /api/docenti/delete-all`).
   - Eliminazione di tutte le registrazioni copie (`DELETE /api/registrazioni-copie/delete-all`).
-- Le chiamate HTTP possono essere implementate con **Axios** o `fetch`, idealmente incapsulate in servizi dedicati (es. `api/docenti`, `api/utenti`, ecc.).
+  - **Export CSV (apribile in Excel) delle tabelle principali**, rispettando i filtri attivi e ignorando la paginazione:
+    - Docenti: `GET /api/docenti/export`, usato dall’hook `useExportDocenti()` (`hooks/use-docenti.ts`) e dal componente `GestioneDocenti`.
+    - Utenti: `GET /api/utenti/export`, usato dall’hook `useExportUtenti()` (`hooks/use-utenti.ts`) e dal componente `GestioneUtenze`.
+    - Registrazioni copie: `GET /api/registrazioni-copie/export`, usato dall’hook `useExportRegistrazioni()` (`hooks/use-registrazioni.ts`) e dal componente `VisualizzaRegistrazioni`.
+    - Gli hook lato frontend costruiscono la query string a partire dallo stato dei filtri, chiamano l’endpoint `/export` con `responseType: 'blob'` e in caso di successo generano e scaricano automaticamente un file `.csv` con nome predefinito (es. `docenti-YYYY-MM-DD.csv`), mostrando toast di conferma o errore tramite `sonner`.
+- Le chiamate HTTP sono incapsulate nell’istanza Axios `api` (`src/lib/api.ts`), che gestisce automaticamente:
+  - base URL configurabile,
+  - header `Authorization` con token JWT,
+  - refresh token e gestione errori 401.
 - TanStack Query si occupa di:
   - caching delle risposte,
   - refetch automatico quando necessario,
-  - gestione di loading/error state.
+  - gestione di loading/error state,
+  - gestione delle mutation (create/update/delete/export) con invalidazione selettiva delle query correlate.
 
 ### Setup & avvio
 
