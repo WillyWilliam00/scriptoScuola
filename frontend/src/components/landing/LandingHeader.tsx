@@ -28,52 +28,46 @@ export default function LandingHeader() {
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5 }}
       className={cn(
-        "sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 transition-all",
+        "sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-backdrop-filter:bg-background/60 transition-all",
         scrolled && "shadow-md"
       )}
     >
       <div className="container mx-auto px-4 h-16 flex items-center justify-between">
         {/* Logo */}
-        <Link to="/landing" className="flex items-center gap-2">
+        <button onClick={() => scrollToSection("hero")} className="flex items-center gap-2 cursor-pointer">
           <img
             src="/logo.svg"
             alt="ScriptaScuola Logo"
             className="h-8 w-8 object-contain"
           />
           <span className="text-xl font-semibold text-primary">ScriptaScuola</span>
-        </Link>
+        </button>
 
         {/* Navigation */}
         <nav className="hidden md:flex items-center gap-4 lg:gap-6">
           <button
             onClick={() => scrollToSection("benefits")}
-            className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
+            className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
           >
-            Vantaggi
-          </button>
-          <button
-            onClick={() => scrollToSection("features")}
-            className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
-          >
-            Funzionalità
+            Perché ScriptaScuola
           </button>
           <button
             onClick={() => scrollToSection("security")}
-            className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
+            className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
           >
-            Sicurezza
+            Dati e sicurezza
           </button>
           <button
             onClick={() => scrollToSection("how-it-works")}
-            className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
+            className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
           >
-            Come Funziona
+            Come funziona
           </button>
           <button
-            onClick={() => scrollToSection("faq")}
-            className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
+            onClick={() => scrollToSection("cta")}
+            className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
           >
-            FAQ
+            Inizia ora
           </button>
         </nav>
 

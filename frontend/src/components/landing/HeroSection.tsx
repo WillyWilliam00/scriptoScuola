@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 
 export default function HeroSection() {
   return (
-    <section className="relative py-20 md:py-32 px-4">
+    <section id="hero" className="relative py-20 md:py-32 px-4">
       <div className="container mx-auto max-w-4xl text-center">
         {/* Titolo principale */}
         <motion.h1
@@ -42,20 +42,6 @@ export default function HeroSection() {
           <Button size="lg" variant="outline" asChild className="text-base px-8 py-6">
             <Link to="/login">Hai già un account? Accedi</Link>
           </Button>
-        </motion.div>
-
-        {/* Logo grande opzionale */}
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 0.8, delay: 0.6 }}
-          className="mt-12 flex justify-center"
-        >
-          <img
-            src="/logo.svg"
-            alt="ScriptaScuola"
-            className="h-24 w-24 md:h-32 md:w-32 opacity-20"
-          />
         </motion.div>
       </div>
     </section>

@@ -1,5 +1,7 @@
 import { motion } from "framer-motion";
 import { HugeiconsIcon } from "@hugeicons/react";
+import { Link } from "react-router-dom";
+import { Button } from "@/components/ui/button";
 import {
   SettingsIcon,
   LayoutIcon,
@@ -22,9 +24,9 @@ const benefits = [
   },
   {
     icon: ShieldIcon,
-    title: "Compliance",
+    title: "Export in Excel",
     description:
-      "Storico completo delle registrazioni per audit e verifiche, sempre disponibile e facilmente consultabile.",
+      "Esporta i dati delle fotocopie in Excel per analisi, report interni e verifiche, quando necessario.",
   },
   {
     icon: FloppyDiskIcon,
@@ -68,7 +70,8 @@ export default function BenefitsSection() {
           className="text-center mb-12"
         >
           <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
-            Vantaggi per la tua scuola
+            Perché scegliere{" "}
+            <span className="text-primary">ScriptaScuola</span>
           </h2>
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
             ScriptaScuola trasforma la gestione delle fotocopie da compito
@@ -104,6 +107,22 @@ export default function BenefitsSection() {
               </p>
             </motion.div>
           ))}
+        </motion.div>
+
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: "-50px" }}
+          transition={{ duration: 0.5 }}
+          className="mt-12 flex justify-center"
+        >
+          <Button
+            asChild
+            size="lg"
+            className="px-8 py-6 text-base"
+          >
+            <Link to="/register">Prova ScriptaScuola gratuitamente</Link>
+          </Button>
         </motion.div>
       </div>
     </section>

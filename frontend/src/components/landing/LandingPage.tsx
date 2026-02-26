@@ -6,8 +6,8 @@ import FeaturesSection from "./FeaturesSection";
 import SecurityFreeSection from "./SecurityFreeSection";
 import StatsSection from "./StatsSection";
 import HowItWorksSection from "./HowItWorksSection";
-import FAQSection from "./FAQSection";
 import CTASection from "./CTASection";
+import FAQSection from "./FAQSection";
 import LandingFooter from "./LandingFooter";
 
 export default function LandingPage() {
@@ -22,8 +22,8 @@ export default function LandingPage() {
         <SecurityFreeSection />
         <StatsSection />
         <HowItWorksSection />
-        <FAQSection />
         <CTASection />
+        <FAQSection />
       </main>
       <LandingFooter />
     </div>

@@ -1,5 +1,7 @@
 import { motion } from "framer-motion";
 import { HugeiconsIcon } from "@hugeicons/react";
+import { Link } from "react-router-dom";
+import { Button } from "@/components/ui/button";
 import {
   FileIcon,
   SettingsIcon,
@@ -24,15 +26,15 @@ const features = [
   },
   {
     icon: LayoutIcon,
-    title: "Dashboard centralizzata",
+    title: "Tutto sotto controllo",
     description:
       "Visualizza tutte le informazioni in un'unica schermata: statistiche, report e analisi.",
   },
   {
     icon: FloppyDiskIcon,
-    title: "Importazione bulk da Excel",
+    title: "Importazione da Excel",
     description:
-      "Importa rapidamente l'elenco docenti da file Excel con anteprima e validazione automatica.",
+      "Importa rapidamente l'elenco docenti da file Excel, con anteprima e controlli automatici.",
   },
   {
     icon: UserIcon,
@@ -42,9 +44,9 @@ const features = [
   },
   {
     icon: ShieldIcon,
-    title: "Multi-tenant sicuro",
+    title: "Istituti separati e ruoli chiari",
     description:
-      "Ogni istituto ha i propri dati completamente isolati e protetti.",
+      "Ogni scuola ha il proprio spazio dedicato e puoi definire ruoli diversi per chi accede.",
   },
 ];
 
@@ -85,7 +87,7 @@ export default function FeaturesSection() {
           className="text-center mb-12"
         >
           <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
-            Perché scegliere ScriptaScuola
+            Funzionalità principali
           </h2>
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
             Una soluzione completa e intuitiva per digitalizzare la gestione
@@ -121,6 +123,22 @@ export default function FeaturesSection() {
               </p>
             </motion.div>
           ))}
+        </motion.div>
+
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: "-50px" }}
+          transition={{ duration: 0.5 }}
+          className="mt-12 flex justify-center"
+        >
+          <Button
+            asChild
+            size="lg"
+            className="px-8 py-6 text-base"
+          >
+            <Link to="/register">Registrati in pochi minuti</Link>
+          </Button>
         </motion.div>
       </div>
     </section>

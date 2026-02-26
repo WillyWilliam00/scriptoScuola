@@ -1,6 +1,8 @@
 import { motion } from "framer-motion";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { Badge } from "@/components/ui/badge";
+import { Link } from "react-router-dom";
+import { Button } from "@/components/ui/button";
 import {
   ShieldIcon,
   KeyIcon,
@@ -10,54 +12,43 @@ import {
   FileIcon,
 } from "@hugeicons/core-free-icons";
 
-const securityFeatures = [
-  {
-    icon: FileIcon,
-    title: "Completamente gratuito",
-    description:
-      "Nessun costo nascosto, nessuna limitazione. ScriptaScuola è gratuito per sempre.",
-    badge: "GRATUITO",
-    color: "green",
-  },
+const securityItems = [
   {
     icon: ShieldIcon,
-    title: "Sicurezza multi-tenant",
-    description:
-      "Ogni istituto ha i propri dati completamente isolati e protetti.",
-    badge: null,
-    color: "blue",
+    title: "Dati di ogni istituto separati",
+    description: "Ogni scuola ha il proprio spazio dedicato e indipendente.",
   },
   {
     icon: UserIcon,
-    title: "Privacy garantita",
+    title: "Accessi con ruoli diversi",
     description:
-      "Nessuna condivisione dati con terze parti. Controllo completo sui tuoi dati.",
-    badge: null,
-    color: "blue",
+      "Puoi assegnare permessi diversi ad amministratori, collaboratori e altri utenti.",
   },
   {
     icon: KeyIcon,
-    title: "Autenticazione sicura",
+    title: "Nessuna condivisione indesiderata",
     description:
-      "Password hashate e autenticazione JWT con refresh token per massima sicurezza.",
-    badge: null,
-    color: "blue",
+      "I dati non vengono condivisi con terze parti non autorizzate.",
+  },
+];
+
+const freeItems = [
+  {
+    icon: FileIcon,
+    title: "Nessun canone mensile",
+    description: "Utilizzi ScriptaScuola senza spese ricorrenti.",
+    badge: "GRATUITO",
   },
   {
     icon: SettingsIcon,
-    title: "Nessun vincolo",
-    description:
-      "Nessun contratto a lungo termine, nessuna carta di credito richiesta.",
-    badge: null,
-    color: "green",
+    title: "Nessuna carta di credito richiesta",
+    description: "Puoi iniziare subito, senza vincoli contrattuali.",
   },
   {
     icon: HelpCircleIcon,
-    title: "Supporto incluso",
+    title: "Tutte le funzionalità incluse",
     description:
-      "Documentazione completa e assistenza gratuita per il setup iniziale.",
-    badge: null,
-    color: "green",
+      "Accedi a tutte le funzioni senza versioni limitate o costi aggiuntivi.",
   },
 ];
 
@@ -94,17 +85,12 @@ export default function SecurityFreeSection() {
           transition={{ duration: 0.6 }}
           className="text-center mb-12"
         >
-          <div className="flex items-center justify-center gap-3 mb-4">
-            <Badge className="bg-green-500 text-white border-green-500 text-base px-4 py-1.5">
-              GRATUITO
-            </Badge>
-          </div>
           <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
-            Sicuro, gratuito e senza compromessi
+            Sicurezza dei dati per il tuo istituto
           </h2>
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-            ScriptaScuola è completamente gratuito e garantisce la massima sicurezza
-            dei tuoi dati.
+            ScriptaScuola tutela le informazioni del tuo istituto e ti permette di
+            utilizzarla senza costi di licenza.
           </p>
         </motion.div>
 
@@ -113,50 +99,104 @@ export default function SecurityFreeSection() {
           initial="hidden"
           whileInView="visible"
           viewport={{ once: true, margin: "-50px" }}
-          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
+          className="grid grid-cols-1 md:grid-cols-2 gap-8"
         >
-          {securityFeatures.map((feature, index) => (
-            <motion.div
-              key={index}
-              variants={itemVariants}
-              whileHover={{ scale: 1.03, y: -5 }}
-              className={`bg-background p-6 rounded-lg border shadow-sm hover:shadow-md transition-shadow ${
-                feature.color === "green"
-                  ? "border-green-500/20"
-                  : "border-blue-500/20"
-              }`}
-            >
-              <div className="flex items-start justify-between mb-4">
-                <div
-                  className={`p-3 rounded-full ${
-                    feature.color === "green"
-                      ? "bg-green-500/10"
-                      : "bg-blue-500/10"
-                  }`}
+          {/* Blocco sicurezza dati */}
+          <div className="bg-blue-500/5 border border-blue-500/20 rounded-2xl p-6 md:p-8">
+            <h3 className="text-xl md:text-2xl font-semibold text-foreground mb-3">
+              Sicurezza e protezione dei dati
+            </h3>
+            <p className="text-sm md:text-base text-muted-foreground mb-6">
+              Ogni istituto mantiene il pieno controllo sulle proprie informazioni,
+              con protezioni pensate per un utilizzo quotidiano semplice e sicuro.
+            </p>
+            <ul className="space-y-4">
+              {securityItems.map((item, index) => (
+                <motion.li
+                  key={index}
+                  variants={itemVariants}
+                  className="flex items-start gap-4"
                 >
-                  <HugeiconsIcon
-                    icon={feature.icon}
-                    className={`h-6 w-6 ${
-                      feature.color === "green"
-                        ? "text-green-600"
-                        : "text-blue-600"
-                    }`}
-                  />
-                </div>
-                {feature.badge && (
-                  <Badge className="bg-green-500 text-white border-green-500">
-                    {feature.badge}
-                  </Badge>
-                )}
+                  <div className="p-3 rounded-full bg-blue-500/10">
+                    <HugeiconsIcon
+                      icon={item.icon}
+                      className="h-6 w-6 text-blue-600"
+                    />
+                  </div>
+                  <div>
+                    <p className="text-sm md:text-base font-semibold text-foreground">
+                      {item.title}
+                    </p>
+                    <p className="text-sm md:text-base text-muted-foreground">
+                      {item.description}
+                    </p>
+                  </div>
+                </motion.li>
+              ))}
+            </ul>
+            <div className="mt-6">
+              <a
+                href="#faq"
+                className="text-sm font-medium text-blue-700 hover:underline"
+              >
+                Scopri di più sulla gestione dei dati
+              </a>
+            </div>
+          </div>
+
+          {/* Blocco completamente gratuito */}
+          <div className="bg-green-500/5 border border-green-500/20 rounded-2xl p-6 md:p-8 flex flex-col justify-between">
+            <div>
+              <div className="flex items-center gap-3 mb-3">
+                <Badge className="bg-green-500 text-white border-green-500 text-xs md:text-sm px-3 py-1">
+                  GRATUITO
+                </Badge>
+                <span className="text-xs md:text-sm text-muted-foreground">
+                  Nessun costo di licenza
+                </span>
               </div>
-              <h3 className="text-lg font-semibold text-foreground mb-2">
-                {feature.title}
+              <h3 className="text-xl md:text-2xl font-semibold text-foreground mb-3">
+                Completamente gratuito
               </h3>
-              <p className="text-sm text-muted-foreground">
-                {feature.description}
+              <p className="text-sm md:text-base text-muted-foreground mb-6">
+                Nessun canone mensile, nessun costo nascosto: utilizzi tutte le
+                funzionalità di ScriptaScuola senza alcun impegno economico.
               </p>
-            </motion.div>
-          ))}
+              <ul className="space-y-4 mb-6">
+                {freeItems.map((item, index) => (
+                  <motion.li
+                    key={index}
+                    variants={itemVariants}
+                    className="flex items-start gap-4"
+                  >
+                    <div className="p-3 rounded-full bg-green-500/10">
+                      <HugeiconsIcon
+                        icon={item.icon}
+                        className="h-6 w-6 text-green-600"
+                      />
+                    </div>
+                    <div>
+                      <p className="text-sm md:text-base font-semibold text-foreground">
+                        {item.title}
+                      </p>
+                      <p className="text-sm md:text-base text-muted-foreground">
+                        {item.description}
+                      </p>
+                    </div>
+                  </motion.li>
+                ))}
+              </ul>
+            </div>
+            <div className="mt-2 flex justify-start">
+              <Button
+                asChild
+                size="lg"
+                className="px-8 py-6 text-base bg-green-600 hover:bg-green-700 text-white"
+              >
+                <Link to="/register">Registrati gratuitamente</Link>
+              </Button>
+            </div>
+          </div>
         </motion.div>
       </div>
     </section>
