@@ -158,3 +158,40 @@ export function useDeleteAllRegistrazioni() {
     },
   });
 }
+
+export function useExportRegistrazioni() {
+  return useMutation({
+    mutationFn: async (registrazioniQuery: RegistrazioniCopieQuery) => {
+          const params = new URLSearchParams();
+          params.append("sortField", registrazioniQuery.sortField ?? "createdAt");
+          params.append("sortOrder", registrazioniQuery.sortOrder ?? "desc");
+          if (registrazioniQuery.docenteNome) params.append("docenteNome", registrazioniQuery.docenteNome);
+          if (registrazioniQuery.docenteCognome) params.append("docenteCognome", registrazioniQuery.docenteCognome);
+          if (registrazioniQuery.utenteIdentifier) params.append("utenteIdentifier", registrazioniQuery.utenteIdentifier);
+          if (registrazioniQuery.copieEffettuate !== undefined) {
+            params.append("copieEffettuate", String(registrazioniQuery.copieEffettuate));
+          }
+    
+          const response = await api.get(`/registrazioni-copie/export?${params.toString()}`, {
+            responseType: "blob",
+          });
+      return response.data;
+    },
+  onSuccess: (data => {
+    
+    const blob = new Blob([data], { type: "text/csv;charset=utf-8;" });
+    const url = window.URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.setAttribute("download", `registrazioni-${new Date().toISOString().slice(0, 10)}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    window.URL.revokeObjectURL(url);
+    toast.success("Esportazione registrazioni completata");
+  }),
+  onError: (err) => {
+    toast.error(formatError(err, "Errore durante l'esportazione delle registrazioni."));
+  }
+})
+}

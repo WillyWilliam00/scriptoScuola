@@ -128,3 +128,41 @@ export function useDeleteUtente(onShowDialog?: () => void) {
     },
   });
 }
+
+export function useExportUtenti() {
+   return useMutation({
+    mutationFn: async (utentiQuery: UtentiQuery) => {
+      const params = new URLSearchParams();
+      if (utentiQuery.identifier) params.append("identifier", utentiQuery.identifier);
+      if (utentiQuery.ruolo) params.append("ruolo", utentiQuery.ruolo);
+      if (utentiQuery.sortField) params.append("sortField", utentiQuery.sortField);
+      if (utentiQuery.sortOrder) params.append("sortOrder", utentiQuery.sortOrder ?? "asc");
+
+      const response = await api.get(`/utenti/export?${params.toString()}`, {
+        responseType: "blob",
+      });
+
+     return response.data;
+   }, 
+   onSuccess: (data) => {
+    const blob = new Blob([data], {type: "text/csv;charset=utf-8;"});
+    const url = window.URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url
+    link.setAttribute('download', `utenti-${new Date().toISOString().slice(0, 10)}.csv`);
+    document.body.appendChild(link)
+    link.click()
+    link.remove()
+    window.URL.revokeObjectURL(url)
+    toast.success("Esportazione utenti completata");
+   },
+   onError: (err) => {
+    toast.error(formatError(err, "Errore durante l'esportazione degli utenti."));
+   }
+    })
+  
+
+
+    
+
+}

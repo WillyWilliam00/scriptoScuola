@@ -5,8 +5,10 @@ import { utentiQuerySchema, createUtenteSchema, modifyUtenteSchema, uuidParamSch
 import { utenti } from '../db/schema.js';
 import { db } from '../db/index.js';
 import { and, eq, sql } from 'drizzle-orm';
-
+import { toCsvValue } from '../db/utils/pagination.js';
 const router = express.Router();
+
+
 
 /**
  * GET /api/utenti
@@ -24,6 +26,47 @@ router.get('/', asyncHandler(async (req: Request, res: Response) => {
     }, myUserId);
     
     res.status(200).json(result);
+}));
+
+/**
+ * GET /api/utenti/export
+ * Esporta in CSV tutti gli utenti che corrispondono ai filtri (senza paginazione)
+ */
+router.get('/export', asyncHandler(async (req: Request, res: Response) => {
+    if (!req.tenantStore) {
+        return res.status(500).json({ error: 'Store non inizializzato' });
+    }
+
+    const query = utentiQuerySchema.parse(req.query);
+    const myUserId = req.user.userId;
+    const rows = await req.tenantStore.utenti.getAllForExport(query, myUserId);
+
+    const header = [
+        'Identificativo',
+        'Ruolo',
+        'Creato il',
+        'Aggiornato il',
+    ];
+
+    const lines = rows.map((row) => {
+        const identificativo = row.ruolo === 'admin' ? row.email : row.username;
+        const createdAt = (row.createdAt instanceof Date) ? row.createdAt.toISOString() : String(row.createdAt);
+        const updatedAt = (row.updatedAt instanceof Date) ? row.updatedAt.toISOString() : String(row.updatedAt);
+
+        return [
+            identificativo ?? '',
+            row.ruolo,
+            createdAt,
+            updatedAt,
+        ].map(toCsvValue).join(';');
+    });
+
+    const csv = [header.map(toCsvValue).join(';'), ...lines].join('\n');
+
+    const today = new Date().toISOString().slice(0, 10);
+    res.setHeader('Content-Type', 'text/csv; charset=utf-8');
+    res.setHeader('Content-Disposition', `attachment; filename="utenti-${today}.csv"`);
+    res.status(200).send('\uFEFF' + csv);
 }));
 
 /**

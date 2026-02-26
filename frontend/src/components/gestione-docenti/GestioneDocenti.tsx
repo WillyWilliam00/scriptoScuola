@@ -17,6 +17,7 @@ import { HugeiconsIcon } from "@hugeicons/react";
 import ErrorFallback from "../common/ErrorFallback";
 import ErrorBoundary from "../common/ErrorBoundary";
 import { useQueryClient } from "@tanstack/react-query";
+import { useExportDocenti } from "@/hooks/use-docenti.js";
 
 type TypeForm = "add" | "edit" | "view" | "delete" | null;
 
@@ -29,6 +30,7 @@ export default function GestioneDocenti() {
   const [isImportDialogOpen, setIsImportDialogOpen] = useState(false);
   const [docentiQuery, setDocentiQuery] = useState<DocentiQuery>(defaultQuery);
   const queryClient = useQueryClient();
+  const { mutate: exportDocenti, isPending: isExporting } = useExportDocenti();
   const handleRetry = () => {
     queryClient.invalidateQueries({ queryKey: ["docenti"] });
     setErrorBoundaryKey((k) => k + 1);
@@ -84,6 +86,10 @@ export default function GestioneDocenti() {
 
   const handleImportClick = useCallback(() => setIsImportDialogOpen(true), []);
 
+  const handleExport = useCallback(() => {
+    exportDocenti(docentiQuery);
+  }, [docentiQuery]);
+
   const filterValues = useMemo(
     () => ({ nome: docentiQuery.nome, cognome: docentiQuery.cognome }),
     [docentiQuery.nome, docentiQuery.cognome]
@@ -117,8 +123,8 @@ export default function GestioneDocenti() {
               <HugeiconsIcon icon={FileIcon} strokeWidth={2} className="size-4" />
             </Button>
 
-            <Button className="" variant="default">
-              Esporta in Excel
+            <Button className="" variant="default" onClick={handleExport} disabled={isExporting}>
+              {isExporting ? "Esportazione..." : "Esporta in Excel"}
               <HugeiconsIcon icon={FileIcon} strokeWidth={2} className="size-4" />
             </Button>
           </div>

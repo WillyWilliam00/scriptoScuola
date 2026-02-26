@@ -17,3 +17,13 @@ export function buildPagination(page: number, pageSize: number, totalItems: numb
     hasPreviousPage: page > 1,
   };
 }
+
+
+export function toCsvValue(value: unknown): string {
+  if (value === null || value === undefined) return '';
+  const str = typeof value === 'string' ? value : String(value);
+  if (/[",;\r\n]/.test(str)) {
+      return `"${str.replace(/"/g, '""')}"`;
+  }
+  return str;
+}
