@@ -18,7 +18,6 @@ import { useAuthStore } from "@/store/auth-store.js";
 import { createRegistrazioneFormSchema } from "../../../../shared/validation.js";
 import type { DocenteConRegistrazioni } from "../../../../shared/types.js";
 import { cn, formatError } from "@/lib/utils.js";
-import { toast } from "sonner";
 
 export interface RegistraCopieItemProps {
   docente: DocenteConRegistrazioni;

@@ -285,6 +285,10 @@ export function useBulkImportDocenti() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['docenti'] });
       queryClient.invalidateQueries({ queryKey: ['registrazioni'] });
+      toast.success("Docenti importati con successo");
+    },
+    onError: (err) => {
+      toast.error(formatError(err, "Errore durante l'importazione dei docenti."));
     },
   });
 }
