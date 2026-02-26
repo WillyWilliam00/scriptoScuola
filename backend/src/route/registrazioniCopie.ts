@@ -3,7 +3,10 @@ import { asyncHandler, requireRole } from '../middleware/auth.js';
 import type { Request, Response } from 'express';
 import { idParamSchema, insertRegistrazioneSchema, modifyRegistrazioneSchema, registrazioniCopieQuerySchema, type InsertRegistrazione, type ModifyRegistrazione } from '../../../shared/validation.js';
 import type { RegistrazioniCopiePaginatedResponse } from '../../../shared/types.js';
+import { toCsvValue } from '../db/utils/pagination.js';
 const router = express.Router();
+
+
 
 
 router.get('/', requireRole('admin'), asyncHandler(async (req: Request, res: Response) => {
@@ -13,6 +16,56 @@ router.get('/', requireRole('admin'), asyncHandler(async (req: Request, res: Res
     const query = registrazioniCopieQuerySchema.parse(req.query);
     const result: RegistrazioniCopiePaginatedResponse = await req.tenantStore.registrazioniCopie.getPaginated(query);
     res.status(200).json(result);
+}))
+
+/**
+ * GET /api/registrazioni-copie/export
+ * Esporta in CSV tutte le registrazioni che corrispondono ai filtri (senza paginazione)
+ */
+router.get('/export', requireRole('admin'), asyncHandler(async (req: Request, res: Response) => {
+    if(!req.tenantStore) {
+        return res.status(500).json({ error: 'Store non inizializzato' });
+    }
+    const query = registrazioniCopieQuerySchema.parse(req.query);
+    const rows = await req.tenantStore.registrazioniCopie.getAllForExport(query);
+
+    const header = [
+        'ID',
+        'Docente nome',
+        'Docente cognome',
+        'Copie effettuate',
+        'Utente',
+        'Note',
+        'Creato il',
+        'Aggiornato il',
+    ];
+
+    const lines = rows.map((row) => {
+        const utente =
+            row.utenteUsername ??
+            row.utenteEmail ??
+            '';
+        const createdAt = (row.createdAt instanceof Date) ? row.createdAt.toISOString() : String(row.createdAt);
+        const updatedAt = (row.updatedAt instanceof Date) ? row.updatedAt.toISOString() : String(row.updatedAt);
+
+        return [
+            row.id,
+            row.docenteNome ?? '',
+            row.docenteCognome ?? '',
+            row.copieEffettuate,
+            utente,
+            row.note ?? '',
+            createdAt,
+            updatedAt,
+        ].map(toCsvValue).join(';');
+    });
+
+    const csv = [header.map(toCsvValue).join(';'), ...lines].join('\n');
+
+    const today = new Date().toISOString().slice(0, 10);
+    res.setHeader('Content-Type', 'text/csv; charset=utf-8');
+    res.setHeader('Content-Disposition', `attachment; filename="registrazioni-${today}.csv"`);
+    res.status(200).send('\uFEFF' + csv);
 }))
 
 router.post('/new-registrazione', asyncHandler(async (req: Request, res: Response) => {

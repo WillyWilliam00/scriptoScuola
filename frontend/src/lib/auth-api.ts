@@ -31,7 +31,6 @@ export async function login(identifier: string, password: string): Promise<Login
   const loginData: LoginData = { identifier, password };
   
   const response = await api.post<LoginResponse>('/auth/login', loginData);
-  console.log('response', response);
   // Salva nello store
   useAuthStore.getState().login(response.data);
   

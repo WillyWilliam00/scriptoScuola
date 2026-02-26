@@ -82,6 +82,53 @@ export const createTenantStore = (istitutoId: number, db: DbInstance | Transacti
 
                 return response;
             },
+            getAllForExport: async (query: DocentiQuery) => {
+                const { nome, cognome, sortField, sortOrder } = docentiQuerySchema.parse(query);
+
+                const conditions = [eq(docenti.istitutoId, istitutoId)];
+                if (nome) conditions.push(ilike(docenti.nome, `%${nome}%`));
+                if (cognome) conditions.push(ilike(docenti.cognome, `%${cognome}%`));
+
+                const copieSubquery = db
+                    .select({
+                        docenteId: registrazioniCopie.docenteId,
+                        totaleCopie: sql<number>`SUM(${registrazioniCopie.copieEffettuate})::int`.as('totale_copie')
+                    })
+                    .from(registrazioniCopie)
+                    .where(eq(registrazioniCopie.istitutoId, istitutoId))
+                    .groupBy(registrazioniCopie.docenteId)
+                    .as('copie_totali');
+
+                const sortMap: Record<DocentiSort['field'], AnyColumn | SQL> = {
+                    nome: docenti.nome,
+                    cognome: docenti.cognome,
+                    limiteCopie: docenti.limiteCopie,
+                    createdAt: docenti.createdAt,
+                    updatedAt: docenti.updatedAt,
+                    copieEffettuate: copieSubquery.totaleCopie as unknown as SQL,
+                    copieRimanenti: sql<number>`GREATEST(0, ${docenti.limiteCopie} - COALESCE(${copieSubquery.totaleCopie}, 0))::int` as unknown as SQL,
+                };
+                const sortKey = (sortField || 'nome') as DocentiSort['field'];
+                const orderByColumn = sortMap[sortKey];
+
+                const result = await db.select({
+                    id: docenti.id,
+                    nome: docenti.nome,
+                    cognome: docenti.cognome,
+                    limiteCopie: docenti.limiteCopie,
+                    istitutoId: docenti.istitutoId,
+                    createdAt: docenti.createdAt,
+                    updatedAt: docenti.updatedAt,
+                    copieEffettuate: sql<number>`COALESCE(${copieSubquery.totaleCopie}, 0)::int`.as('copie_effettuate'),
+                    copieRimanenti: sql<number>`GREATEST(0, ${docenti.limiteCopie} - COALESCE(${copieSubquery.totaleCopie}, 0))::int`.as('copie_rimanenti')
+                })
+                    .from(docenti)
+                    .leftJoin(copieSubquery, eq(docenti.id, copieSubquery.docenteId))
+                    .where(and(...conditions))
+                    .orderBy(...getSort(orderByColumn, sortOrder, docenti.id));
+
+                return result;
+            },
             create: async (data: Omit<InsertDocente, 'istitutoId'>) => {
                 const { nome, cognome, limiteCopie } = insertDocenteSchema.parse({...data, istitutoId});
                 const docenteEsistente = await db.select().from(docenti).where(and(eq(docenti.nome, nome), eq(docenti.cognome, cognome), eq(docenti.istitutoId, istitutoId)));
@@ -283,6 +330,39 @@ export const createTenantStore = (istitutoId: number, db: DbInstance | Transacti
                 }
                 return response;
             },
+            getAllForExport: async(query: UtentiQuery, myUserId: string) => {
+                const { identifier, ruolo, sortField, sortOrder } = utentiQuerySchema.parse(query);
+                const isEmail = identifier ? isEmailIdentifier(identifier) : false;
+
+                const condition = [eq(utenti.istitutoId, istitutoId), ne(utenti.id, myUserId)];
+                if (identifier) {
+                    if (isEmail) condition.push(ilike(utenti.email, `%${identifier}%`));
+                    else condition.push(ilike(utenti.username, `%${identifier}%`));
+                }
+                if (ruolo) condition.push(eq(utenti.ruolo, ruolo));
+
+                const sortMap: Record<UtentiSort['field'], AnyColumn | SQL> = {
+                    ruolo: utenti.ruolo,
+                    identificativo: sql`COALESCE(${utenti.username}, ${utenti.email})`,
+                };
+                const sortKey = (sortField || 'ruolo') as UtentiSort['field'];
+                const orderByColumn = sortMap[sortKey];
+
+                const result = await db.select({
+                    id: utenti.id,
+                    username: utenti.username, 
+                    email: utenti.email,
+                    ruolo: utenti.ruolo,
+                    createdAt: utenti.createdAt,
+                    updatedAt: utenti.updatedAt,
+                    istitutoId: utenti.istitutoId,
+                })
+                .from(utenti)
+                .where(and(...condition))
+                .orderBy(...getSort(orderByColumn, sortOrder, utenti.id));
+
+                return result as Utente[];
+            },
             create: async(data: Omit<CreateUtente, 'istitutoId'>) => {
                 const validateData = createUtenteSchema.parse(data);
                 const isAdmin = validateData.ruolo === 'admin';
@@ -452,6 +532,53 @@ export const createTenantStore = (istitutoId: number, db: DbInstance | Transacti
                 }
                 return response;
 
+            },
+            getAllForExport: async(query: RegistrazioniCopieQuery) => {
+                const { docenteId, utenteId, docenteNome, docenteCognome, copieEffettuate: copieFilter, utenteIdentifier, sortField, sortOrder } = registrazioniCopieQuerySchema.parse(query);
+                const condition = [eq(registrazioniCopie.istitutoId, istitutoId)];
+                if(docenteId) condition.push(eq(registrazioniCopie.docenteId, docenteId));
+                if(utenteId) condition.push(eq(registrazioniCopie.utenteId, utenteId));
+                if(docenteNome) condition.push(ilike(docenti.nome, `%${docenteNome}%`));
+                if(docenteCognome) condition.push(ilike(docenti.cognome, `%${docenteCognome}%`));
+                if(copieFilter !== undefined) condition.push(eq(registrazioniCopie.copieEffettuate, copieFilter));
+                if(utenteIdentifier) {
+                    const toPush = or(ilike(utenti.username, `%${utenteIdentifier}%`), ilike(utenti.email, `%${utenteIdentifier}%`));
+                    if(toPush) condition.push(toPush);
+                }
+                const sortMap: Record<RegistrazioniCopieSort['field'], AnyColumn | SQL> = {
+                    docenteId: registrazioniCopie.docenteId,
+                    utenteId: registrazioniCopie.utenteId,
+                    createdAt: registrazioniCopie.createdAt,
+                    updatedAt: registrazioniCopie.updatedAt,
+                    docenteNome: docenti.nome,
+                    docenteCognome: docenti.cognome,
+                    copieEffettuate: registrazioniCopie.copieEffettuate,
+                    utente: sql`COALESCE(${utenti.username}, ${utenti.email})`,
+                }
+                const sortKey = (sortField || 'createdAt') as RegistrazioniCopieSort['field'];
+                const orderByColumn = sortMap[sortKey]; 
+                
+                const registrazioni = await db.select({
+                    id: registrazioniCopie.id,
+                    docenteId: registrazioniCopie.docenteId,
+                    copieEffettuate: registrazioniCopie.copieEffettuate,
+                    istitutoId: registrazioniCopie.istitutoId,
+                    utenteId: registrazioniCopie.utenteId,
+                    note: registrazioniCopie.note,
+                    createdAt: registrazioniCopie.createdAt,
+                    updatedAt: registrazioniCopie.updatedAt,
+                    docenteNome: docenti.nome,
+                    docenteCognome: docenti.cognome,
+                    utenteUsername: utenti.username,
+                    utenteEmail: utenti.email,
+                })
+                .from(registrazioniCopie)
+                .leftJoin(docenti, eq(registrazioniCopie.docenteId, docenti.id))
+                .leftJoin(utenti, eq(registrazioniCopie.utenteId, utenti.id))
+                .where(and(...condition))
+                .orderBy(...getSort(orderByColumn, sortOrder, registrazioniCopie.id));
+
+                return registrazioni;
             },
             create: async(data: Omit<InsertRegistrazione, 'istitutoId'>) => {
                 const validateData = insertRegistrazioneSchema.parse(data);

@@ -1,4 +1,6 @@
 import { motion } from "framer-motion";
+import { Link } from "react-router-dom";
+import { Button } from "@/components/ui/button";
 import { HugeiconsIcon } from "@hugeicons/react";
 import {
   FileIcon,
@@ -30,7 +32,7 @@ const problems = [
     icon: SettingsIcon,
     title: "Tempo perso in gestione",
     description:
-      "Ore spese in compilazione manuale di registri e calcoli, sottraendo tempo alle attività principali.",
+      "Molte ore dedicate alla compilazione manuale di registri e calcoli, sottraendo tempo alle attività didattiche e organizzative.",
   },
 ];
 
@@ -71,11 +73,11 @@ export default function ProblemSection() {
           className="text-center mb-12"
         >
           <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
-            Il problema delle scuole moderne
+            La gestione delle fotocopie oggi
           </h2>
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-            La gestione manuale delle fotocopie crea inefficienze e complicazioni
-            che rallentano il lavoro amministrativo.
+            La gestione manuale delle fotocopie genera inefficienze e complessità
+            che rallentano il lavoro amministrativo e organizzativo degli istituti.
           </p>
         </motion.div>
 
@@ -109,6 +111,22 @@ export default function ProblemSection() {
               </div>
             </motion.div>
           ))}
+        </motion.div>
+
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: "-50px" }}
+          transition={{ duration: 0.5 }}
+          className="mt-12 flex justify-center"
+        >
+          <Button
+            asChild
+            size="lg"
+            className="px-8 py-6 text-base"
+          >
+            <Link to="/register">Inizia a semplificare la gestione</Link>
+          </Button>
         </motion.div>
       </div>
     </section>

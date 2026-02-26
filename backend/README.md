@@ -94,6 +94,11 @@ Protette da `authMiddleware` + `tenantStoreMiddleware` (accesso per istituto).
   - Usa `docentiQuerySchema` per validare query string.
   - Risposta con `{ data, pagination }`.
 
+- `GET /api/docenti/export`
+  - Esporta **tutti i docenti che corrispondono ai filtri correnti** (ignorando paginazione) in formato **CSV** (apribile in Excel).
+  - Usa gli stessi parametri di `GET /api/docenti` (filtri + sort), validati da `docentiQuerySchema`.
+  - Restituisce un file con intestazioni leggibili (Nome, Cognome, Limite copie, Copie effettuate, Copie rimanenti, date creazione/aggiornamento).
+
 - `POST /api/docenti/new-docente` (solo admin)
   - Crea un nuovo docente per l’istituto corrente.
   - Body validato con `insertDocenteSchema` (senza `istitutoId`, gestito da store).
@@ -122,6 +127,11 @@ Protette da `authMiddleware` + `tenantStoreMiddleware` + `requireRole('admin')`.
   - Restituisce lista paginata degli utenti dell’istituto.
   - Query validata con `utentiQuerySchema` (paginazione, filtri per ruolo/identifier, ordinamento) da `shared/validation.ts`.
 
+- `GET /api/utenti/export`
+  - Esporta **tutti gli utenti che corrispondono ai filtri correnti** (ignorando paginazione) in formato **CSV**.
+  - Usa gli stessi parametri di `GET /api/utenti` (identifier, ruolo, sort), validati da `utentiQuerySchema`.
+  - Nel CSV viene incluso un identificativo leggibile (email per admin, username per collaboratori) e le date di creazione/aggiornamento.
+
 - `POST /api/utenti/new-utente`
   - Crea un nuovo utente (tipicamente collaboratore o admin).
   - Body validato con `createUtenteSchema` (ruolo, email/username, password).
@@ -141,6 +151,11 @@ Protette da `authMiddleware` + `tenantStoreMiddleware`.
 - `GET /api/registrazioni-copie`
   - (Rotta tipicamente riservata ad admin) restituisce lista paginata di registrazioni con filtri.
   - Query validata con `registrazioniCopieQuerySchema` (paginazione, filtri per docenteId/utenteId, ordinamento).
+
+- `GET /api/registrazioni-copie/export`
+  - Esporta **tutte le registrazioni che corrispondono ai filtri correnti** (ignorando paginazione) in formato **CSV**.
+  - Usa gli stessi filtri e parametri di sort di `GET /api/registrazioni-copie`, validati da `registrazioniCopieQuerySchema`.
+  - Ogni riga contiene dati del docente, dell’utente (se presente), numero di copie, note e date di creazione/aggiornamento.
 
 - `POST /api/registrazioni-copie/new-registrazione`
   - Crea una **nuova registrazione di copie** effettuate da un docente.

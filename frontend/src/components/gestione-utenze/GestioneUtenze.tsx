@@ -14,6 +14,7 @@ import { Button } from "@/components/ui/button";
 import ErrorBoundary from "../common/ErrorBoundary";
 import ErrorFallback from "../common/ErrorFallback";
 import { useQueryClient } from "@tanstack/react-query";
+import { useExportUtenti } from "@/hooks/use-utenti.js";
 
 
 
@@ -31,6 +32,7 @@ export default function GestioneUtenze() {
     sortField: "ruolo",
   };
   const [utentiQuery, setUtentiQuery] = useState<UtentiQuery>(defaultQuery);
+  const {mutate: exportUtenti, isPending: isExporting} = useExportUtenti();
   const [selectedUtente, setSelectedUtente] = useState<Utente | null>(null);
   const [typeForm, setTypeForm] = useState<"delete" | "edit" | "view" | "add" | null>(null);
   const [errorBoundaryKey, setErrorBoundaryKey] = useState(0);
@@ -78,6 +80,10 @@ export default function GestioneUtenze() {
     setSelectedUtente(null);
   }
 
+  const handleExport = useCallback(() => {
+    exportUtenti(utentiQuery)
+  }, [utentiQuery])
+
   const filterValues = useMemo(
     () => ({ identifier: utentiQuery.identifier }),
     [utentiQuery.identifier]
@@ -94,8 +100,13 @@ export default function GestioneUtenze() {
             filterValues={filterValues}
             onFilterChange={handleFilterChange}
           />
-          <Button className="mt-4" variant="default">
-            Esporta in Excel
+          <Button
+            className="mt-4"
+            variant="default"
+            onClick={handleExport}
+            disabled={isExporting}
+          >
+            {isExporting ? "Esportazione..." : "Esporta in Excel"}
             <HugeiconsIcon icon={File} strokeWidth={2} className="size-4" />
           </Button>
           <NuovoUtenteModal typeForm={typeForm} onClose={handleCloseForm} onOpenAddForm={handleOpenAddForm} />

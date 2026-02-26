@@ -12,6 +12,10 @@ import { ServerFiltersBar } from "@/components/common/ServerFiltersBar";
 import { useQueryClient } from "@tanstack/react-query";
 import type { RegistrazioniCopieQuery } from "@shared/validation";
 import type { RegistrazioniCopieSort } from "@shared/types";
+import { Button } from "@/components/ui/button";
+import { HugeiconsIcon } from "@hugeicons/react";
+import { useExportRegistrazioni } from "@/hooks/use-registrazioni";
+
 
 type TypeForm = "view" | "edit" | "delete" | null;
 
@@ -24,6 +28,7 @@ const defaultQuery: RegistrazioniCopieQuery = {
 
 export default function VisualizzaRegistrazioni() {
   const queryClient = useQueryClient();
+  const {mutate: exportRegistrazioni, isPending: isExporting} = useExportRegistrazioni();
   const [typeForm, setTypeForm] = useState<TypeForm>(null);
   const [selectedRegistrazione, setSelectedRegistrazione] = useState<Registrazioni | null>(null);
   const [registrazioniQuery, setRegistrazioniQuery] = useState<RegistrazioniCopieQuery>(defaultQuery);
@@ -84,6 +89,10 @@ export default function VisualizzaRegistrazioni() {
     });
   }, []);
 
+ const handleExport = useCallback(() => {
+  exportRegistrazioni(registrazioniQuery)
+ }, [registrazioniQuery])
+
   const filterValues = useMemo(
     () => ({
       docenteNome: registrazioniQuery.docenteNome ?? "",
@@ -113,6 +122,15 @@ export default function VisualizzaRegistrazioni() {
             filterValues={filterValues}
             onFilterChange={handleFilterChange}
           />
+          <Button
+            className="mt-4"
+            variant="default"
+            onClick={handleExport}
+            disabled={isExporting}
+          >
+            {isExporting ? "Esportazione..." : "Esporta in Excel"}
+            <HugeiconsIcon icon={FileIcon} strokeWidth={2} className="size-4" />
+          </Button>
         </div>
         <ErrorBoundary
           key={errorBoundaryKey}

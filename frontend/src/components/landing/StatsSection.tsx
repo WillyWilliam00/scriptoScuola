@@ -52,7 +52,7 @@ export default function StatsSection() {
           className="text-center mb-12"
         >
           <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
-            Dashboard centralizzata
+            Tutto sotto controllo
           </h2>
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
             Visualizza tutte le informazioni in un'unica schermata: statistiche,
@@ -60,11 +60,10 @@ export default function StatsSection() {
           </p>
         </motion.div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
-          {/* Testo a sinistra */}
+        <div className="max-w-3xl mx-auto">
           <motion.div
-            initial={{ opacity: 0, x: -50 }}
-            whileInView={{ opacity: 1, x: 0 }}
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.6 }}
             className="space-y-6"
@@ -95,76 +94,6 @@ export default function StatsSection() {
                   </div>
                 </motion.div>
               ))}
-            </div>
-          </motion.div>
-
-          {/* Mockup dashboard a destra */}
-          <motion.div
-            initial={{ opacity: 0, x: 50 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.6 }}
-            className="bg-background border rounded-lg p-6 shadow-lg"
-          >
-            <div className="space-y-6">
-              {/* Header mockup */}
-              <div className="flex items-center justify-between border-b pb-4">
-                <h3 className="text-lg font-semibold text-foreground">
-                  Statistiche settimanali
-                </h3>
-                <div className="text-sm text-muted-foreground">
-                  Ultimi 7 giorni
-                </div>
-              </div>
-
-              {/* Grafico a barre semplice */}
-              <div className="space-y-4">
-                <div className="flex items-end justify-between gap-2 h-48">
-                  {chartData.map((day, index) => (
-                    <motion.div
-                      key={index}
-                      initial={{ height: 0 }}
-                      whileInView={{ height: `${(day.value / maxValue) * 100}%` }}
-                      viewport={{ once: true }}
-                      transition={{
-                        duration: 0.6,
-                        delay: index * 0.1,
-                        ease: "easeOut",
-                      }}
-                      className="flex-1 flex flex-col items-center gap-2"
-                    >
-                      <div className="w-full bg-primary rounded-t-lg min-h-[20px] flex items-end">
-                        <div className="w-full bg-gradient-to-t from-primary to-primary/60 rounded-t-lg" />
-                      </div>
-                      <span className="text-xs text-muted-foreground">
-                        {day.label}
-                      </span>
-                    </motion.div>
-                  ))}
-                </div>
-              </div>
-
-              {/* Progress bars mockup */}
-              <div className="space-y-3 pt-4 border-t">
-                <div>
-                  <div className="flex justify-between text-sm mb-2">
-                    <span className="text-muted-foreground">
-                      Limite mensile utilizzato
-                    </span>
-                    <span className="font-semibold text-foreground">68%</span>
-                  </div>
-                  <Progress value={68} />
-                </div>
-                <div>
-                  <div className="flex justify-between text-sm mb-2">
-                    <span className="text-muted-foreground">
-                      Docenti attivi questo mese
-                    </span>
-                    <span className="font-semibold text-foreground">24/30</span>
-                  </div>
-                  <Progress value={80} />
-                </div>
-              </div>
             </div>
           </motion.div>
         </div>
