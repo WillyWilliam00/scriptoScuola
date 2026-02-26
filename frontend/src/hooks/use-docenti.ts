@@ -2,6 +2,8 @@ import { useQuery, useSuspenseQuery, useSuspenseInfiniteQuery, useMutation, useQ
 import { api } from '../lib/api.js';
 import type { DocentiPaginatedResponse, DocenteConRegistrazioni } from '../../../shared/types.js';
 import type { BulkImportDocenti, DocentiQuery, InsertDocente, ModifyDocente } from '../../../shared/validation.js';
+import { toast } from 'sonner';
+import { formatError } from '@/lib/utils.js';
 
 /**
  * Hook per gestire i docenti con TanStack Query
@@ -171,6 +173,10 @@ export function useCreateDocente() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['docenti'] });
+      toast.success("Docente creato con successo");
+    },
+    onError: (err) => {
+      toast.error(formatError(err, "Errore durante la creazione del docente."));
     },
   });
 }
@@ -195,6 +201,10 @@ export function useUpdateDocente() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['docenti'] });
+      toast.success("Docente aggiornato con successo");
+    },
+    onError: (err) => {
+      toast.error(formatError(err, "Errore durante l'aggiornamento del docente."));
     },
   });
 }
@@ -218,6 +228,10 @@ export function useDeleteDocente() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['docenti'] });
+      toast.success("Docente eliminato con successo");
+    },
+    onError: (err) => {
+      toast.error(formatError(err, "Errore durante l'eliminazione del docente."));
     },
   });
 }
@@ -242,6 +256,10 @@ export function useDeleteAllDocenti() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['docenti'] });
       queryClient.invalidateQueries({ queryKey: ['registrazioni'] });
+      toast.success("Tutti i docenti sono stati eliminati con successo");
+    },
+    onError: (err) => {
+      toast.error(formatError(err, "Errore durante l'eliminazione dei docenti."));
     },
   });
 }

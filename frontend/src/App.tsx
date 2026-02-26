@@ -8,7 +8,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useAuthStore } from "./store/auth-store.js";
 import Login from "./components/auth/Login.js";
 import LandingPage from "./components/landing/LandingPage.js";
-
+import { Toaster } from "sonner";
 // Code splitting: le pagine vengono caricate solo quando servono
 const Register = lazy(() => import("./components/auth/Register"));
 const RegistraCopie = lazy(() => import("./components/RegistraCopie"));
@@ -127,6 +127,7 @@ export function App() {
           </Suspense>
         </BrowserRouter>
       </QueryClientProvider>
+      <Toaster position="bottom-right"/>
     </ErrorBoundary>
   );
 }

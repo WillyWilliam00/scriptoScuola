@@ -2,7 +2,8 @@ import { useSuspenseQuery, useMutation, useQueryClient } from '@tanstack/react-q
 import { api } from '../lib/api.js';
 import type { RegistrazioniCopiePaginatedResponse } from '../../../shared/types.js';
 import type { RegistrazioniCopieQuery, InsertRegistrazione, ModifyRegistrazione } from '../../../shared/validation.js';
-
+import { toast } from 'sonner';
+import { formatError } from '@/lib/utils.js';
 
 
 /**
@@ -59,11 +60,15 @@ export function useCreateRegistrazione() {
       );
       return response.data;
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
       // Invalida la cache delle registrazioni per forzare il refetch
       queryClient.invalidateQueries({ queryKey: ['registrazioni'] });
       // Invalida anche la cache dei docenti perché le copie effettuate cambiano
       queryClient.invalidateQueries({ queryKey: ['docenti'] });
+      toast.success(`${data.copieEffettuate} copie registrate con successo`);
+    },
+    onError: (err) => {
+      toast.error(formatError(err, "Errore durante la registrazione."));
     },
   });
 }
@@ -90,6 +95,10 @@ export function useUpdateRegistrazione() {
       queryClient.invalidateQueries({ queryKey: ['registrazioni'] });
       // Invalida anche la cache dei docenti perché le copie effettuate cambiano
       queryClient.invalidateQueries({ queryKey: ['docenti'] });
+      toast.success("Registrazione aggiornata con successo");
+    },
+    onError: (err) => {
+      toast.error(formatError(err, "Errore durante l'aggiornamento della registrazione."));
     },
   });
 }
@@ -115,6 +124,10 @@ export function useDeleteRegistrazione() {
       queryClient.invalidateQueries({ queryKey: ['registrazioni'] });
       // Invalida anche la cache dei docenti perché le copie effettuate cambiano
       queryClient.invalidateQueries({ queryKey: ['docenti'] });
+      toast.success("Registrazione eliminata con successo");
+    },
+    onError: (err) => {
+      toast.error(formatError(err, "Errore durante l'eliminazione della registrazione."));
     },
   });
 }
@@ -138,6 +151,10 @@ export function useDeleteAllRegistrazioni() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['registrazioni'] });
       queryClient.invalidateQueries({ queryKey: ['docenti'] });
+      toast.success("Tutte le registrazioni sono state eliminate con successo");
+    },
+    onError: (err) => {
+      toast.error(formatError(err, "Errore durante l'eliminazione delle registrazioni."));
     },
   });
 }
