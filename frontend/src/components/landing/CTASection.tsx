@@ -37,7 +37,7 @@ export default function CTASection() {
         transition={{ duration: 0.6 }}
         className="bg-primary/5 border-2 border-primary/20 py-20 md:py-32 px-4"
       >
-        <div className="max-w-6xl mx-auto rounded-2xl p-8 md:p-12">
+        <div className="max-w-6xl mx-auto rounded-2xl  md:p-12">
           <div className="grid gap-10 md:grid-cols-2 ">
             <div className="text-center md:text-left">
               <motion.h2
